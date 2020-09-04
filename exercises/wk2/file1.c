@@ -10,23 +10,32 @@
 #include <stdio.h>
 
 int main(){
-    int limit = 0, even_product = 0, odd_product = 0, sum;
+    int limit = 10, even_product = 1, odd_product = 1, sum;
     char c;
+
     printf("The value of limit is %d\n", limit);
-    for(i = 0: i <= limit: ++i){ 
-       if(i / 2 = 0){
-           even_product = i;
+    
+    // Calculate all the products, then add the two together.
+    int i;
+    for(i = 1; i <= limit; i++){ 
+       if(i % 2 == 0){
+           even_product *= i;
        }   
-        if(i / 2 == 1){
-           odd_product ^ i;
+       if(i % 2 == 1){
+           odd_product *= i;
        }
         sum = even_product + odd_product;
     }
-    printf("The Sum = \n", "%d", sum);
-    for(c = 'Z'; c <= 'A'; c-2){
-            // printf("here\n");
-            printf("%s ", c);
+    printf("The Sum = %d\n", sum);
+
+    // Print out letters
+    for(c = 'Z'; c >= 'A'; c -= 2){
+            printf("%c ", c);
     }
+
+    // A courtesy newline so the shell input isn't at the end of an existing line.
+    printf("\n");
     
     return 0;
 }
+
