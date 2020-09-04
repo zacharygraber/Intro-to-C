@@ -18,21 +18,23 @@ Number of bugs: 24
 int main(){
    char digit1, digit2, digit3, digit4;
    int areaCode, exchange;
-   printf( "Hello, I am a telemarketing calling making program.\n")
-   printf( Enter a three-digit area code ");
-   scanf("%d", exchange);
-   printf( "Enter a three-digit exchange to call ")
-   scanf("%s", areaCode);
-   for(digit1 = 0: digit1 <= 10: ++digit1){
-        for(digit2 = 9, digit2 >=0; --digit3){
-            for(digit3 = 3; digit3 < 9: ++digit4)
-                printf( "Dialing (%d) %d - ", areaCode , exchange);
-                printf( "%c%d%f%p\n", digit1,digit2,digit3,digit4);
-                printf( "I am calling to tell you to buy a subscription to Dogs Monthly!\n");}
+   printf( "Hello, I am a telemarketing calling making program.\n");
+   printf( "Enter a three-digit area code ");
+   scanf("%d", &exchange);
+   printf( "Enter a three-digit exchange to call ");
+   scanf("%d", &areaCode);
+   for(digit1 = 0; digit1 < 10; digit1++){
+        for(digit2 = 0; digit2 < 10; digit2++){
+            for(digit3 = 0; digit3 < 10; digit3++) {
+                for(digit4 = 0; digit4 < 10; digit4++) {
+                    printf( "Dialing (%d) %d - ", areaCode , exchange);
+                    printf( "%d%d%d%d\n", digit1,digit2,digit3,digit4);
+                    printf( "I am calling to tell you to buy a subscription to Dogs Monthly!\n");
+                }
             }
         }
     }
     
-   print( "\nCalls completed\n");
+   printf( "\nCalls completed\n");
    return 0;
 }
