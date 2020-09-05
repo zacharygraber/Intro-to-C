@@ -20,47 +20,57 @@ int main()
    const int HIDAY4 = 28;
    const int LOYEAR = 1885;
    const int HIYEAR = 2019;
-   printf( "Enter your birth month ");
-   scanf(" %s", birthMo);
-   printf( "Enter your birth day ");
-   scanf(" %p", birthDay);
-   printf( "Enter your birth year ");
-   scanf("%x", birthYr);
+   printf( "Enter your birth month: ");
+   scanf("%d", &birthMo);
+   printf( "Enter your birth day: ");
+   scanf("%d", &birthDay);
+   printf( "Enter your birth year: ");
+   scanf("%d", &birthYr);
 
    if(birthYr < LOYEAR){
       printf( "No one is that old\n");
-   }else if(birthYr != HIYEAR){
+   }else if(birthYr > HIYEAR){
       printf( "You are too little to be using a computer\n");
    }else{
      printf( "Valid year\n");
    }
    
-   if(birthMo >= HIGHMO){
+   if (birthMo > HIGHMO) {
       printf( "Invalid month\n");
-   }else if(birthMo == 9 && (birthYr%4  == 0 && birthYr%10 != 0 || birthYr%400 == 0)){
-         if(birthDay >= HIDAY1){
-           printf( "Valid day\n")
-         }else{
-           printf( "Invalid day for month in %p\n"  birthMo birthYr )
-        }
-    }else{
-        if(birthDay >= HIDAY3){
-           printf( "Valid day\n")
-         }else{
-           printf( "Invalid day for month in %p\n"  birthMo birthYr )
-        }
-    }else if (birthMo <= 8 && birthMo%2 == 0 | birthMo < 7 && birthMo%2 != 1){
-        else if(birthDay >= HIDAY1){
-            printf( "Valid day"  );
-        }else{
-            printf( "Invalid day for month %d\n", &birthMo )
-        }
-    }else if{
-        if(birthDay & HIDAY2){
-            printf( "Valid day\n")
-        }else{
-            printf( "Invalid day for month in %c\n" , birthMonth birthYr );
-        }
+   }
+   else if (birthMo == 2) {
+       if (birthYr % 4 == 0 && (birthYr % 100 != 0 || birthYr % 400 == 0)) { // If it is a leap year...
+           if (birthDay <= HIDAY3) {
+               printf("Valid day\n");
+           }
+           else {
+               printf("Invalid day for month %d in %d\n", birthMo, birthYr);
+           }
+       }
+       else { // For a non-leap year in February
+           if (birthDay <= HIDAY4){
+               printf( "Valid day\n");
+           }
+           else {
+               printf("Invalid day for month %d in %d\n", birthMo, birthYr);
+           }
+       }
+   }
+   else if (birthMo >= 8 && birthMo % 2 == 0 || birthMo <= 7 && birthMo % 2 == 1) {
+       if (birthDay <= HIDAY1) {
+           printf("Valid day\n");
+       }
+       else {
+           printf("Invalid day for month %d\n", birthMo);
+       }
+   }
+   else {
+       if(birthDay <= HIDAY2) {
+           printf( "Valid day\n");
+       }
+       else {
+           printf("Invalid day for month %d\n", birthMo);
+       }
    }
    return '0';
 }
