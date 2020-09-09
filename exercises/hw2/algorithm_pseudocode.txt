@@ -1,0 +1,132 @@
+|-------------------------------------------------------|
+|						        |
+|      Contains pseudocode for the algorithm in Q1      |
+|						        |
+|_______________________________________________________|
+
+bool sentinelValue := true
+int weeklyNo, hourlyNo, commissionNo
+int maleNo[3], femaleNo[3], domesticNo[3], internationalNo[3]
+char mainMenuInput
+double avgSal, avgSalWeekly, avgSalHourly, avgSalCommission, avgSalMale, avgSalFemale, avgSalDomestic, avgSalInternational
+const double COMMISSION_HOURLY_RATE := 7.1
+
+while (sentinelValue)
+    print("\tMain Menu\n\t\t\tEnter payroll info (E)\n\t\t\tQuit (Q)\n")
+    scan("[char]", := mainMenuInput)
+    switch (mainMenuInput)
+        case 'E':
+            print("Please enter the number of workers of each type in the format W # H # C #\n")
+            scan(" W [int] H [int] C [int]", := weeklyNo, := hourlyNo, := commissionNo)
+            
+            int i
+            char intOrDom, mOrF
+            double thisSal
+
+            for (i := 0; i < weeklyNo; i++)
+                print("Enter info for weekly worker [int]\n", i + 1)
+                print("Male or Female? (M/F): ")
+                scan("[char]", := mOrF)
+                print("International or Domestic? (I/D): ")
+                scan("[char]", := intOrDom)
+                print("Weeky Salary: ")
+                scan("[double]", := thisSal)
+
+                avgSalWeekly += thisSal
+                avgSal += thisSal
+
+                if (mOrF == 'M')
+                    maleNo[0] += 1
+                    avgSalMale += thisSal
+                else if (mOrF == 'F')
+                    femaleNo[0] += 1
+                    avgSalFemale += thisSal
+                if (intOrDom == 'I')
+                    internationalNo[0] += 1
+                    avgSalInternational += thisSal
+                else if (intOrDom == 'D')
+                    domesticNo[0] += 1
+                    avgSalDomestic += thisSal
+            avgSalWeekly /= weeklyNo
+
+            double hoursWorked, hourlyRate
+            for (i := 0; i < hourlyNo; i++)
+                print("Enter info for hourly worker [int]\n", i + 1)
+                print("Male or Female? (M/F): ")
+                scan("[char]", := mOrF)
+                print("International or Domestic? (I/D): ")
+                scan("[char]", := intOrDom)
+                print("Number of hours worked this week: ")
+                scan("[double]", := hoursWorked)
+                print("Hourly rate: ")
+                scan("[double]", := hourlyRate)
+                
+                if (hoursWorked <= 10)
+                    thisSal = hoursWorked * hourlyRate
+                else
+                    thisSal = (10 * hourlyRate) + ((hoursWorked - 10) * (hourlyRate * 1.5))
+                avgSalHourly += thisSal
+                avgSal += thisSal
+
+                if (mOrF == 'M')
+                    maleNo[1] += 1
+                    avgSalMale += thisSal
+                else if (mOrF == 'F')
+                    femaleNo[1] += 1
+                    avgSalFemale += thisSal
+                if (intOrDom == 'I')
+                    internationalNo[1] += 1
+                    avgSalInternational += thisSal
+                else if (intOrDom == 'D')
+                    domesticNo[1] += 1
+                    avgSalDomestic += thisSal
+            avgSalHourly /= hourlyNo
+
+            for (i := 0; i < commissionNo; i++)
+                print("Enter info for commission worker [int]\n", i + 1)
+                print("Male or Female? (M/F): ")
+                scan("[char]", := mOrF)
+                print("International or Domestic? (I/D): ")
+                scan("[char]", := intOrDom)
+                print("Number of hours worked this week: ")
+                scan("[double]", := hoursWorked)
+                
+                thisSal = 250 + (COMMISSION_HOURLY_RATE * hoursWorked)
+                avgSalCommission += thisSal
+                avgSal += thisSal
+                
+                if (mOrF == 'M')
+                    maleNo[2] += 1
+                    avgSalMale += thisSal
+                else if (mOrF == 'F')
+                    femaleNo[2] += 1
+                    avgSalFemale += thisSal
+                if (intOrDom == 'I')
+                    internationalNo[2] += 1
+                    avgSalInternational += thisSal
+                else if (intOrDom == 'D')
+                    domesticNo[2] += 1
+                    avgSalDomestic += thisSal
+            avgSalCommission /= commissionNo
+            avgSal /= (weeklyNo + hourlyNo + commissionNo)
+            avgSalMale /= (maleNo[0] + maleNo[1] + maleNo[2])
+            avgSalFemale /= (femaleNo[0] + femaleNo[1] + femaleNo[2])
+            avgSalInternational /= (internationalNo[0] + internationalNo[1] + internationalNo[2])
+            avgSalDomestic /= (domesticNo[0] + domesticNo[1] + domesticNo[2])
+
+            print("\n")
+	    print("\t\t\tStatistics\n")
+            print("[int] workers total ([int] Male / [int] Female, [int] Domestic / [int] International)\n", (weeklyNo + hourlyNo + commissionNo), (maleNo[0] + maleNo[1] + maleNo[2]), (femaleNo[0] + femaleNo[1] + femaleNo[2]), (domesticNo[0] + domesticNo[1] + domesticNo[2]), (internationalNo[0] + internationalNo[1] + internationalNo[2]))
+            print("[int] Weekly workers ([int] Male / [int] Female, [int] Domestic / [int] International)\n", weeklyNo, maleNo[0], femaleNo[0], domesticNo[0], internationalNo[0])
+            print("[int] Hourly workers ([int] Male / [int] Female, [int] Domestic / [int] International)\n", hourlyNo, maleNo[1], femaleNo[1], domesticNo[1], internationalNo[1])
+            print("[int] Commission workers ([int] Male / [int] Female, [int] Domestic / [int] International)\n", commissionNo, maleNo[2], femaleNo[2], domesticNo[2], internationalNo[2])
+            print("Overall average salary: [double]\n", avgSal)
+            print("Average salary Male vs. Female: [double] vs. [double]\n", avgSalMale, avgSalFemale)
+            print("Average salary Domestic vs. International: [double] vs. [double]\n", avgSalDomestic, avgSalInternational)
+            print("Average salary Weekly vs. Hourly vs. Commission: [double] vs. [double] vs. [double]/n", avgSalWeekly, avgSalHourly, avgSalCommission)
+            print("\n")
+
+            break
+        case 'Q':
+            sentinelValue := false
+            break
