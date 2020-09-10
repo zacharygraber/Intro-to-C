@@ -4,6 +4,7 @@
 | Date: 9/9/2020				        |
 |_______________________________________________________*/
 #include <stdio.h>
+#include <stdbool.h>
 int main() {
 	bool sentinelValue = true;
 	int weeklyNo, hourlyNo, commissionNo;
@@ -12,102 +13,128 @@ int main() {
 	double avgSal, avgSalWeekly, avgSalHourly, avgSalCommission, avgSalMale, avgSalFemale, avgSalDomestic, avgSalInternational;
 	const double COMMISSION_HOURLY_RATE = 7.1;
 
-	while (sentinelValue)
-	    printf("\tMain Menu\n\t\t\tEnter payroll info (E)\n\t\t\tQuit (Q)\n");
-	    scanf("%c", &mainMenuInput);
-	    switch (mainMenuInput)
+	while (sentinelValue) {
+	    printf("\n\t\t\tMain Menu\n\t\t\t---------\n\t\t\tEnter payroll info (E)\n\t\t\tQuit (Q)\n");
+	    scanf(" %c", &mainMenuInput);
+	    switch (mainMenuInput) {
 		case 'E':
 		    printf("Please enter the number of workers of each type in the format W # H # C #\n");
-		    scanf(" W %d H %d C %d", = weeklyNo, = hourlyNo, = commissionNo);
+		    scanf(" W %d H %d C %d", &weeklyNo, &hourlyNo, &commissionNo);
 		    
 		    int i;
 		    char intOrDom, mOrF;
 		    double thisSal;
 
-		    for (i = 0; i < weeklyNo; i++)
+		    // Go through all the weekly workers
+		    for (i = 0; i < weeklyNo; i++) {
 			printf("Enter info for weekly worker %d\n", i + 1);
 			printf("Male or Female? (M/F): ");
-			scanf("%c", = mOrF);
+			scanf("  %c", &mOrF);
 			printf("International or Domestic? (I/D): ");
-			scanf("%c", = intOrDom);
+			scanf("  %c", &intOrDom);
 			printf("Weeky Salary: ");
-			scanf("%f", = thisSal);
+			scanf("  %lf", &thisSal);
+			printf("\n");
 
 			avgSalWeekly += thisSal;
 			avgSal += thisSal;
 
-			if (mOrF == 'M')
+			if (mOrF == 'M') {
 			    maleNo[0] += 1;
 			    avgSalMale += thisSal;
-			else if (mOrF == 'F')
+			}
+			else if (mOrF == 'F') {
 			    femaleNo[0] += 1;
 			    avgSalFemale += thisSal;
-			if (intOrDom == 'I')
+			}
+
+			if (intOrDom == 'I') {
 			    internationalNo[0] += 1;
 			    avgSalInternational += thisSal;
-			else if (intOrDom == 'D')
+			}
+			else if (intOrDom == 'D') {
 			    domesticNo[0] += 1;
 			    avgSalDomestic += thisSal;
+			}
+		    }
 		    avgSalWeekly /= weeklyNo;
 
+		    // Go through all the hourly workers
 		    double hoursWorked, hourlyRate;
-		    for (i = 0; i < hourlyNo; i++)
+		    for (i = 0; i < hourlyNo; i++) {
 			printf("Enter info for hourly worker %d\n", i + 1);
 			printf("Male or Female? (M/F): ");
-			scanf("%c", = mOrF);
+			scanf("  %c", &mOrF);
 			printf("International or Domestic? (I/D): ");
-			scanf("%c", = intOrDom);
+			scanf("  %c", &intOrDom);
 			printf("Number of hours worked this week: ");
-			scanf("%f", = hoursWorked);
+			scanf("  %lf", &hoursWorked);
 			printf("Hourly rate: ");
-			scanf("%f", = hourlyRate);
+			scanf("  %lf", &hourlyRate);
+			printf("\n");
 			
-			if (hoursWorked <= 10)
+			if (hoursWorked <= 10) {
 			    thisSal = hoursWorked * hourlyRate;
-			else
+			}
+			else {
 			    thisSal = (10 * hourlyRate) + ((hoursWorked - 10) * (hourlyRate * 1.5));
+			}
 			avgSalHourly += thisSal;
 			avgSal += thisSal;
 
-			if (mOrF == 'M')
+			if (mOrF == 'M') {
 			    maleNo[1] += 1;
 			    avgSalMale += thisSal;
-			else if (mOrF == 'F')
+			}
+			else if (mOrF == 'F') {
 			    femaleNo[1] += 1;
 			    avgSalFemale += thisSal;
-			if (intOrDom == 'I')
+			}
+
+			if (intOrDom == 'I') {
 			    internationalNo[1] += 1;
 			    avgSalInternational += thisSal;
-			else if (intOrDom == 'D')
+			}
+			else if (intOrDom == 'D') {
 			    domesticNo[1] += 1;
 			    avgSalDomestic += thisSal;
+			}
+		    }
 		    avgSalHourly /= hourlyNo;
 
-		    for (i = 0; i < commissionNo; i++)
+		    // Go through commissioned workers
+		    for (i = 0; i < commissionNo; i++) {
 			printf("Enter info for commission worker %d\n", i + 1);
 			printf("Male or Female? (M/F): ");
-			scanf("%c", = mOrF);
+			scanf("  %c", &mOrF);
 			printf("International or Domestic? (I/D): ");
-			scanf("%c", = intOrDom);
+			scanf("  %c", &intOrDom);
 			printf("Number of hours worked this week: ");
-			scanf("%f", = hoursWorked);
+			scanf("  %lf", &hoursWorked);
+			printf("\n");
 			
 			thisSal = 250 + (COMMISSION_HOURLY_RATE * hoursWorked);
 			avgSalCommission += thisSal;
 			avgSal += thisSal;
 			
-			if (mOrF == 'M')
-			    maleNo[2] += 1;
-			    avgSalMale += thisSal;
-			else if (mOrF == 'F')
-			    femaleNo[2] += 1;
-			    avgSalFemale += thisSal;
-			if (intOrDom == 'I')
-			    internationalNo[2] += 1;
-			    avgSalInternational += thisSal;
-			else if (intOrDom == 'D')
-			    domesticNo[2] += 1;
-			    avgSalDomestic += thisSal;
+			if (mOrF == 'M') {
+		    	    maleNo[2] += 1;
+		    	    avgSalMale += thisSal;
+			}
+		    	else if (mOrF == 'F') {
+		    	    femaleNo[2] += 1;
+		    	    avgSalFemale += thisSal;
+			}
+
+		    	if (intOrDom == 'I') {
+		    	    internationalNo[2] += 1;
+		    	    avgSalInternational += thisSal;
+			}
+		    	else if (intOrDom == 'D') {
+		    	    domesticNo[2] += 1;
+		    	    avgSalDomestic += thisSal;
+			}
+		    }
 		    avgSalCommission /= commissionNo;
 		    avgSal /= (weeklyNo + hourlyNo + commissionNo);
 		    avgSalMale /= (maleNo[0] + maleNo[1] + maleNo[2]);
@@ -124,12 +151,15 @@ int main() {
 		    printf("Overall average salary: %f\n", avgSal);
 		    printf("Average salary Male vs. Female: %f vs. %f\n", avgSalMale, avgSalFemale);
 		    printf("Average salary Domestic vs. International: %f vs. %f\n", avgSalDomestic, avgSalInternational);
-		    printf("Average salary Weekly vs. Hourly vs. Commission: %f vs. %f vs. %f/n", avgSalWeekly, avgSalHourly, avgSalCommission);
+		    printf("Average salary Weekly vs. Hourly vs. Commission: %f vs. %f vs. %f\n", avgSalWeekly, avgSalHourly, avgSalCommission);
 		    printf("\n");
 
 		    break;
+
 		case 'Q':
 		    sentinelValue = false;
 		    break;
+	    }
+	}
 	return(0);
 }
