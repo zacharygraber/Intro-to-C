@@ -19,25 +19,55 @@
  *
  *
  * */
+#include <stdio.h>
+#include <math.h>
 
 void printGrade(int score){
 	//print the students grade based on their score in the class
+	printf("Your grade is: ");
+	if (score > 97) {
+		printf("A+");	
+	}
+	else if (score >= 90) {
+		printf("A");
+	}
+	else if (score >= 80) {
+		printf("B");
+	}
+	else if (score >= 70) {
+		printf("C");
+	}
+	else {
+		printf("F");
+	}
+	printf("\n");
 }
-int main(void){
+
+int main(void) {
 	char ch;
 	float score;
 	int assignments;
 	do {
 		printf("How many assignmnets did you have ? ");
+    		//get the number of assignments from the student
+    		scanf(" %d", &assignments);
 
-    //get the number of assignmnets from the student
+		printf("Enter your score for all assignments in the format '#/#': \n" );
 
-		printf("Enter your score for all assignments : \n" );
+		//get the student's score and the max score for each assignment
+		int totalPointsPossible = 0;
+		int thisScore;
+		int thisMax;
+		int i;
+		for (i = 1; i <= assignments; i++) {
+			printf("Score for assignment %d: ", i);
+			scanf(" %d/%d", &thisScore, &thisMax);
+			score += thisScore;
+			totalPointsPossible += thisMax;
+		}
 
-    //get the student's score and the max score for each assignment
-
-    //calculate the student's percentage in the class using the information you've gathered.
-		int percent;
+		//calculate the student's percentage in the class using the information you've gathered.
+		int percent = round(((float)score / (float)totalPointsPossible) * 100);
 
 		printGrade(percent);
 
