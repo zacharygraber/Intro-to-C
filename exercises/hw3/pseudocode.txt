@@ -1,0 +1,23 @@
+/* Psuedocode for Assignment 3 of FA20 CSCI-C 291
+ * Author: Zachary E. Graber (zegraber@iu.edu)
+ * Date: 9/16/2020                                */
+
+
+function main ()
+	const int ROWS := 15
+	const int SEATS_PER_ROW := 7
+	bool sentinel := true
+	while (sentinel)
+		print "Type 'F' for first class\n"
+		print "Type 'B' for business class\n"
+		print "Type anything else for economy\n"
+		print "Type 'Q' to quit\n"
+
+		char userSelection := an input (char) from user
+		switch over userSelection
+			case 'F'
+				findFirstClassSeat
+	
+		return
+
+function findFirstClassSeat () returns int[2] of 2D array indices
