@@ -27,6 +27,9 @@ struct Pair {
 	int j;
 };
 
+struct Seat *seatPointersArr[ROWS * SEATS_PER_ROW] = { NULL };
+int seatPointersArrSize = 0;
+
 int numEmptySeatsBetweenRows(int seatMatrix[ROWS][SEATS_PER_ROW], int r1, int r2);
 int numFirstClassSeats(int seatMatrix[ROWS][SEATS_PER_ROW]);
 int numBusinessClassSeats(int seatMatrix[ROWS][SEATS_PER_ROW]);
@@ -40,30 +43,40 @@ char* mallocName(char passengerName[]);
 void freeMallocedNames(void);
 
 int main(void) {
-
 	srand(time(NULL)); // Seed the random number generator
 	char mmInput;
-	printf("Type 'F' for First Class\n");
-	printf("Type 'B' for Business Class\n");
-	printf("Type anything else for Economy\n");
-	scanf(" %c", &mmInput);
-	
-	int seatMatrix[ROWS][SEATS_PER_ROW] = { {0} };
 
-	struct Pair initAssnmt;
-	switch(mmInput) {
-		case 'F':
-			//TODO
-			break;
+	bool sentinel = true;
+	while (sentinel) {
+		printf("Type 'F' for First Class\n");
+		printf("Type 'B' for Business Class\n");
+		printf("Type 'Q' to quit\n");
+		printf("Type anything else for Economy\n");
+		scanf(" %c", &mmInput);
+		
+		int seatMatrix[ROWS][SEATS_PER_ROW] = { {0} };
 
-		case 'B':
-			//TODO
-			break;
+		bool userSatisfiedWithInitAssnmt = false;
+		struct Pair assnmt;
+		switch(mmInput) {
+			case 'F':
+				while (!userSatisfiedWithInitAssnmt) {
+					assnmt = getEmptySeatBetweenRows(seatMatrix, 1, 3);
+					printf();
+				}
+				break;
 
-		// Default case represents any other input
-		default:
-			//TODO
-			break;
+			case 'B':
+				//TODO
+				break;
+			case 'Q':
+				sentinel = false;
+				break;
+			// Default case represents any other input
+			default:
+				//TODO
+				break;
+		}
 	}
 	struct Pair testSeat = getEmptySeatBetweenRows(seatMatrix, 0, 2);
 	printf("Random Seat between row 0 and 2: (%d, %d)", testSeat.i, testSeat.j);
