@@ -5,34 +5,32 @@
 
 #include <stdio.h>
 
-char CharacterScan(int*);
+char CharacterScan(int* iPtr);
 
 int main(void){
 
-  char exit;
-  while(0){
-    //exit = getchar();
+  while(1) {
 
     int aCode;
-    char* iPtr;
-    char c = CharacterScan(&iPtr);
-    aCode = iPtr;
+    int *iPtr = &aCode;
+    char c = CharacterScan(iPtr);
 
-    if(exit == '\027'){
+    if(aCode == 27){
       break;
     }
     else{
-      printf("%c is ASCII code %p.\n", c, &iPtr);
+      printf("%c is ASCII code %d.\n", c, aCode);
     }
   }
+  return(0);
 }
 
 char CharacterScan(int* iPtr){
   char c;
 
   printf("Enter a character: ");
-  scanf(" %p", &c);
+  scanf(" %c", &c);
 
-  *iPtr = (float)c;
-  return 0;
+  *iPtr = (int)c;
+  return c;
 }
