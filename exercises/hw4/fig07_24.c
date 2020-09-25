@@ -18,10 +18,13 @@ typedef struct card {
 // prototypes
 void shuffle(unsigned int wDeck[][FACES]); // shuffling modifies wDeck
 void deal(unsigned int wDeck[][FACES], const char *wFace[], const char *wSuit[]); // dealing doesn't modify the arrays
+bool cardsEqual(Card card1, Card card2);
 bool hasHighCard(Card hand[HAND_SIZE]);
 bool hasTwoPairs(Card hand[HAND_SIZE]);
 bool hasThreeOfAKind(Card hand[HAND_SIZE]);
 bool hasStraight(Card hand[HAND_SIZE]);
+int indexOfMinFace(Card hand[HAND_SIZE]);
+bool handContainsFace(Card hand[HAND_SIZE], int face);
 bool hasFlush(Card hand[HAND_SIZE]);
 bool hasFourOfAKind(Card hand[HAND_SIZE]);
 bool hasStraightFlush(Card hand[HAND_SIZE]);
@@ -79,14 +82,27 @@ void deal(unsigned int wDeck[][FACES], const char *wFace[], const char *wSuit[])
          for (size_t column = 0; column < FACES; ++column) {
             // if slot contains current card, display card
             if (wDeck[row][column] == card) {
-               printf("%5s of %-8s\n", wFace[column], wSuit[row]); // Print them vertically stacked
+               printf("%-5s of %-8s\n", wFace[column], wSuit[row]); // Print them vertically stacked
 	       Card thisCard = {row, column};
 	       hand[i] = thisCard; 
             } 
          } 
       } 
    } 
-   printf("Hand contains High Card: %c", handHasHighCard(PLACEHOLDER) ? 'T' : 'F');
+   printf("\nHand contains High Card: %c\n", hasHighCard(hand) ? 'T' : 'F');
+   printf("Hand contains Two Pairs: %c\n", hasTwoPairs(hand) ? 'T' : 'F');
+   printf("Hand contains Three of a Kind: %c\n", hasThreeOfAKind(hand) ? 'T' : 'F');
+   printf("Hand contains a Straight: %c\n", hasStraight(hand) ? 'T' : 'F');
+   printf("Hand contains a Flush: %c\n", hasFlush(hand) ? 'T' : 'F');
+   printf("Hand contains Four of a Kind: %c\n", hasFourOfAKind(hand) ? 'T' : 'F');
+   printf("Hand contains a Straight Flush: %c\n", hasStraightFlush(hand) ? 'T' : 'F'); 
+}
+
+bool cardsEqual(Card card1, Card card2) {
+	if (card1.row == card2.row && card1.column == card2.column) {
+		return true;
+	}
+	return false;
 }
 
 bool hasHighCard(Card hand[HAND_SIZE]) {
@@ -95,7 +111,96 @@ bool hasHighCard(Card hand[HAND_SIZE]) {
 }
 
 bool hasTwoPairs(Card hand[HAND_SIZE]) {
-	for (int i = 0; i < HAND_SIZE; i++) {
-		if (//TODO)
+	int firstPairI = -1;
+	for (int i = 0; i < HAND_SIZE - 1; i++) {
+		for (int j = i + 1; j < HAND_SIZE; j++) {
+			if (cardsEqual(hand[i], hand[j])) {
+				if (firstPairI == -1) {
+					firstPairI = i;
+				}
+				else if (!cardsEqual(hand[j], hand[firstPairI])) {
+					return true;
+				}
+			}
+		}
 	}
+	return false;
+}
+
+bool hasThreeOfAKind(Card hand[HAND_SIZE]) {
+	int copiesFound;
+	for (int i = 0; i < HAND_SIZE - 1; i++) {
+		copiesFound = 0;
+		for (int j = i + 1; j < HAND_SIZE; j++) {
+			if (cardsEqual(hand[i], hand[j])) {
+				if (copiesFound == 1) {
+					return true;
+				}
+				else {
+					copiesFound += 1;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool hasStraight(Card hand[HAND_SIZE]) {
+	int minFaceValue = hand[indexOfMinFace(hand)].column;
+	for (int i = 1; i <= 5; i++) {
+		if (!handContainsFace(hand, minFaceValue + i)) {
+			return false;
+		}
+	}
+	return true;	
+}
+
+int indexOfMinFace(Card hand[HAND_SIZE]) {
+	int minIndex = 0;
+	for (int i = 0; i < HAND_SIZE; i++) {
+		if (hand[i].column < hand[minIndex].column) {
+			minIndex = i;
+		}
+	}
+	return minIndex;
+}
+
+bool handContainsFace(Card hand[HAND_SIZE], int face) {
+	for (int i = 0; i < HAND_SIZE; i++) {
+		if (hand[i].column == face) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool hasFlush(Card hand[HAND_SIZE]) {
+	for (int i = 0; i < HAND_SIZE; i++) {
+		if (hand[i].row != hand[0].row) {
+			return false;
+		} 
+	}
+	return true;
+}
+
+bool hasFourOfAKind(Card hand[HAND_SIZE]) {
+	int copiesFound;
+	for (int i = 0; i < HAND_SIZE - 1; i++) {
+		copiesFound = 0;
+		for (int j = i + 1; j < HAND_SIZE; j++) {
+			if (cardsEqual(hand[i], hand[j])) {
+				if (copiesFound == 2) {
+					return true;
+				}
+				else {
+					copiesFound += 1;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool hasStraightFlush(Card hand[HAND_SIZE]) {
+	return (hasFlush(hand)) && (hasStraight(hand));
 }
