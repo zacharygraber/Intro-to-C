@@ -4,20 +4,20 @@
 #include <stdio.h>
 #include <string.h>
 
-void main(void){
+int main(void){
   
   //int size = 10;
  
   char s[20];
-  int * cPtr;
-  scanf(" %x", &s);
+  char * cPtr;
+  scanf(" %s", s);
   cPtr = s;
 
   //int i=0;
-  while(&cPtr != '\0'){
-    printf("%p", cPtr--);
-      }
+  while(*(cPtr) != '\0') {
+    printf("%c", *(cPtr++));
+  }
 
   printf("\n");
-  return 0
+  return(0);
 }
