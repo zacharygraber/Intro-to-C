@@ -150,6 +150,10 @@ void game(){
 	    endOfTail = get_end(snake);
 	    endX = endOfTail->x;
 	    endY = endOfTail->y;
+	
+	    if (score >= 100) {
+	        timeret.tv_nsec = (999999999 / 4) / (1.5 * (score / 100));
+	    }
 
             ch = get_char();
 	    switch (ch) {
