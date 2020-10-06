@@ -75,12 +75,10 @@ void add_new_food(Food* foods, Food* new_food){
 
 // Given a food at x, y, removes it from foods and returns the type of the food
 enum Type remove_eaten_food(Food* foods, int x, int y){
-    //Implement the code to remove food eaten by the snake
-    enum Type typeOfFood;
+    char typeOfFood;
     Food *temp = foods;
     while (temp) {
 	if (temp->x == x && temp->y == y) {
-	    // If this is the food we're looking for, then stop here
 	    typeOfFood = temp->type;
 	    break;
 	}
@@ -91,18 +89,22 @@ enum Type remove_eaten_food(Food* foods, int x, int y){
 
     // Now that we have the food in question, we delete it as if it were a node in a singly-linked list.
     if (temp == foods) {
-	foods = foods->next; // Consider the edge case where the food in question is the first one
+	printf("HERE\n");
+	foods = temp->next; // Consider the edge case where the food in question is the first one
+	return typeOfFood == 'O' ? Increase : Decrease;
+    }
+    else {
+	// Traverse the list until we reach the node before temp
+	Food *oneBeforeTemp = foods;
+	while (oneBeforeTemp->next != temp) {
+	    oneBeforeTemp = oneBeforeTemp->next;
+	}
+	// Once we've found it, replace its 'next' attribute with temp's 'next'
+    	oneBeforeTemp->next = temp->next;
     }
 
-    // Traverse the list until we reach the node before temp
-    Food *oneBeforeTemp = foods;
-    while (oneBeforeTemp->next != temp) {
-	oneBeforeTemp = oneBeforeTemp->next;
-    }
-    // Once we've found it, replace its 'next' attribute with temp's 'next'
-    oneBeforeTemp->next = temp->next;
-
-    return typeOfFood;
+    free(temp);
+    return typeOfFood == 'O' ? Increase : Decrease;
 }
 
 // Display all the food

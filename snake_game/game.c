@@ -32,6 +32,9 @@ void game(){
     Snake *snake; // The snake
     Food *foods,*new_food; // List of foods (Not an array)
     int snakeDir; // The current direction the snake is moving.
+    Snake *endOfTail; // The end of the snake's tail
+    int endX; // X location of end of tail
+    int endY; // Y location of end of tail
 
     const int height = 30; 
     const int width = 70;
@@ -143,8 +146,11 @@ void game(){
             break;
 
         case ALIVE:
+	    endOfTail = get_end(snake);
+	    endX = endOfTail->x;
+	    endY = endOfTail->y;
+
             ch = get_char();
-            
 	    switch (ch) {
 		// Movement cases. Prevent oppositional direction changes. 
 		case UP:
@@ -176,9 +182,25 @@ void game(){
 		    state = EXIT;
 		    break;
 	    }
+
 	    // Move the snake (if the player has entered a direction yet
 	    if (snakeDir != NOCHAR) {
 		snake = move_snake(snake, snakeDir);
+	    }
+
+	    // Check to see if the snake's head is now in a food
+	    if (food_exists(foods, snake->x, snake->y)) {
+		switch (remove_eaten_food(foods, snake->x, snake->y)) {
+		    case Increase:
+			// TODO: Add score
+			(get_end(snake))->next = create_tail(endX, endY); // Add another tail on the end
+			break;
+		    case Decrease:
+			// TODO: Remove score
+			snake = remove_tail(snake);
+			break;
+		}
+		// TODO: spawn another food
 	    }
 
 	    // Draw everything on the screen
