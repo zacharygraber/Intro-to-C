@@ -35,6 +35,7 @@ void game(){
     Snake *endOfTail; // The end of the snake's tail
     int endX; // X location of end of tail
     int endY; // Y location of end of tail
+    int score = 0;
 
     const int height = 30; 
     const int width = 70;
@@ -192,20 +193,28 @@ void game(){
 	    if (food_exists(foods, snake->x, snake->y)) {
 		switch (remove_eaten_food(foods, snake->x, snake->y)) {
 		    case Increase:
-			// TODO: Add score
+			score += 20;
 			(get_end(snake))->next = create_tail(endX, endY); // Add another tail on the end
 			break;
 		    case Decrease:
-			// TODO: Remove score
+			score -= 10;
 			snake = remove_tail(snake);
 			break;
 		}
-		// TODO: spawn another food
+		// spawn another food
+		int food_x, food_y;
+		generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
+                while (food_exists(foods,food_x, food_y))
+                    generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
+                type = (rand() > RAND_MAX/2) ? Increase : Decrease;
+                new_food = create_food(food_x, food_y, type);
+                add_new_food(foods, new_food);
 	    }
 
 	    // Draw everything on the screen
             clear();
             mvprintw(20,20, "Key entered: %c", ch);
+	    mvprintw(0, 0, "Score:  %d", score);
             draw_Gamewindow(window);
             draw_snake(snake);
             draw_food(foods);
