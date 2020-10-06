@@ -36,6 +36,7 @@ void game(){
     int endX; // X location of end of tail
     int endY; // Y location of end of tail
     int score = 0;
+    int boardIncreases = 0;
 
     const int height = 30; 
     const int width = 70;
@@ -150,7 +151,8 @@ void game(){
 	    endOfTail = get_end(snake);
 	    endX = endOfTail->x;
 	    endY = endOfTail->y;
-	
+		
+	    // Scale the timescale with the score.	
 	    if (score >= 100) {
 	        timeret.tv_nsec = (999999999 / 4) / (1.5 * (score / 100));
 	    }
@@ -185,6 +187,20 @@ void game(){
 		    break;
 		case 'Q':
 		    state = EXIT;
+		    break;
+
+		// Resizing
+		case '+':
+		    if (boardIncreases < 3) {
+			window = changeGameWindow(window->upper_left_x - 5, window->upper_left_y - 5, window->width + 10, window->height + 10, window);
+			boardIncreases += 1;
+		    }
+		    break;
+		case '-':
+		    if (boardIncreases > -3) {
+			window = changeGameWindow(window->upper_left_x + 5, window->upper_left_y + 5, window->width - 10, window->height - 10, window);
+			boardIncreases -= 1;
+		    }
 		    break;
 	    }
 
