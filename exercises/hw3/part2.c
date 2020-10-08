@@ -1,7 +1,7 @@
-/* A program that makes a simple airline booking system.   *
+/* A program that makes an airline booking system.         *
  * Solves FA20 CSCI-C 291 HW2 Part 2                       *
  * Author: Zachary E Graber (zegraber@iu.edu)              *
- * Date: 9/16/2020 					   *
+ * Date: 10/7/2020 					   *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
@@ -44,6 +44,10 @@ struct Seat* convertMatrixEntryToSeat(int seatMatrix[ROWS][SEATS_PER_ROW], int i
 struct Pair* getEmptySeatBetweenRows(int seatMatrix[ROWS][SEATS_PER_ROW], int r1, int r2);
 char* getNameInput();
 void registerSeatInGlobalArray(Seat* seat, Pair* pos);
+void printConfirmation(Seat* seat);
+void printSeatingChart(int seatMatrix[ROWS][SEATS_PER_ROW]);
+void printManifest(void);
+void printBoardingPass(char letter, int seatNo);
 void freeMallocedSeats(void);
 
 
@@ -62,6 +66,7 @@ int main(void) {
 
 		bool userSatisfied = false;
 		struct Pair *assnmt;
+		Seat *assignedSeat;
 	
 		// If every seat is full already
 		if (numEmptySeatsBetweenRows(seatMatrix, 0, ROWS - 1) == 0) {
@@ -71,20 +76,53 @@ int main(void) {
 		// Keep going until the user is satisfied.
 		while (!userSatisfied) {
 			switch(mmInput) {
+				// First Class Booking
 				case 'F':
 					if (numFirstClassSeats(seatMatrix) > 0) {
-						assnmt = getEmptySeatBetweenRows(seatMatrix, 1, 3);
-						Seat *assignedSeat = convertMatrixEntryToSeat(seatMatrix, assnmt->i, assnmt->j);
+						assnmt = getEmptySeatBetweenRows(seatMatrix, 0, 2);
+						assignedSeat = convertMatrixEntryToSeat(seatMatrix, assnmt->i, assnmt->j);
 						if (confirmInitSelection(assignedSeat)) {
 							char usrInput;
 							printf("Would you like to downgrade to Business class? (y / n)\n");
 							scanf(" %c", &usrInput);
 							if (usrInput == 'Y' || usrInput == 'y') {
-								// TODO: Get a downgraded seat (if possible) and choose between them !!!FREE THE ONE NOT USED!!!
+								// Get a downgraded seat (if possible) and choose between them !!!FREE THE ONE NOT USED!!!
+								if (numBusinessClassSeats(seatMatrix) > 0) {
+									do {
+										free(assignedSeat);
+										free(assnmt);
+										assnmt = getEmptySeatBetweenRows(seatMatrix, 3, 6);
+										assignedSeat = convertMatrixEntryToSeat(seatMatrix, assnmt->i, assnmt->j);
+										printConfirmation(assignedSeat);
+									} while (!confirmInitSelection(assignedSeat));
+									assignedSeat->name = getNameInput();
+									registerSeatInGlobalArray(assignedSeat, assnmt);
+									seatMatrix[assnmt->i][assnmt->j] = 1;
+									userSatisfied = true;
+									printConfirmation(assignedSeat);
+								}
+								// Business class is full
+								else {
+									printf("Sorry, but Business class is full. Would you like to...\n\t> Book seat %c%d in First class ('Y')\n\t> Cancel (Anything else)\n", assignedSeat->letter, assignedSeat->seatNo);
+									scanf(" %c", &usrInput);
+									if (usrInput == 'Y' || usrInput == 'y') {
+										assignedSeat->name = getNameInput();
+										registerSeatInGlobalArray(assignedSeat, assnmt);
+										seatMatrix[assnmt->i][assnmt->j] = 1;
+										userSatisfied = true;
+										printConfirmation(assignedSeat);
+									}
+									else {
+										free(assignedSeat);
+										userSatisfied = true;
+									}
+								}
 							}
 							else {
 								assignedSeat->name = getNameInput();
-								registerSeatInGlobalArray(assignedSeat, assnmt); // Puts the heap-stored ptr for the seat in seatPointersArr
+								registerSeatInGlobalArray(assignedSeat, assnmt); // Puts the heap ptr for the seat in seatPointersArr
+								seatMatrix[assnmt->i][assnmt->j] = 1; // Mark the seat as occupied
+								printConfirmation(assignedSeat);
 								userSatisfied = true;
 							}
 						}
@@ -113,24 +151,197 @@ int main(void) {
 					}
 					break;
 
+				// Business class booking
 				case 'B':
-					//TODO
+					if (numBusinessClassSeats(seatMatrix) > 0) {
+						assnmt = getEmptySeatBetweenRows(seatMatrix, 3, 6);
+						assignedSeat = convertMatrixEntryToSeat(seatMatrix, assnmt->i, assnmt->j);
+						if (confirmInitSelection(assignedSeat)) {
+							char usrInput;
+							printf("Would you like to...\n\t> Upgrade to First class (F)\n\t> Downgrade to Economy class (E)\n\t> No thanks (N)\n");
+							scanf(" %c", &usrInput);
+							switch (usrInput) {
+								case 'f':
+								case 'F':
+									if (numFirstClassSeats(seatMatrix) > 0) {
+										free(assignedSeat);
+										mmInput = 'F';
+									}
+									else {
+										printf("Sorry, but First class is full.\nWould you still like to book seat %c%d (y / n)?\n", assignedSeat->letter, assignedSeat->seatNo);
+										scanf(" %c", &usrInput);
+										if (usrInput == 'Y' || usrInput == 'y') {
+											assignedSeat->name = getNameInput();
+											registerSeatInGlobalArray(assignedSeat, assnmt);
+											seatMatrix[assnmt->i][assnmt->j] = 1;
+											userSatisfied = true;
+											printConfirmation(assignedSeat);
+										}
+										else {
+											free(assignedSeat);
+											userSatisfied = true;
+										}
+									}
+									break;
+								case 'e':
+								case 'E':
+									if (numEconomyClassSeats(seatMatrix) > 0) {
+										free(assignedSeat);
+										mmInput = 'E';
+									}
+									else {
+										printf("Sorry, but Economy class is full.\nWould you still like to book seat %c%d (y / n)?\n", assignedSeat->letter, assignedSeat->seatNo);
+										scanf(" %c", &usrInput);
+										if (usrInput == 'Y' || usrInput == 'y') {
+											assignedSeat->name = getNameInput();
+											registerSeatInGlobalArray(assignedSeat, assnmt);
+											seatMatrix[assnmt->i][assnmt->j] = 1;
+											userSatisfied = true;
+											printConfirmation(assignedSeat);
+										}
+										else {
+											free(assignedSeat);
+											userSatisfied = true;
+										}
+									}
+									break;
+								default:
+									assignedSeat->name = getNameInput();
+									registerSeatInGlobalArray(assignedSeat, assnmt);
+									seatMatrix[assnmt->i][assnmt->j] = 1;
+									userSatisfied = true;
+									printConfirmation(assignedSeat);
+									break;
+							}
+						}
+						else {
+							free(assignedSeat); // Free this assignment and let them pick a new one
+						}
+						free(assnmt);
+					}
+					// If Business class is full, offer a downgrade to economy
+					else {
+						printf("Sorry, but Business class is full. Would you like to downgrade?\n\t> Economy (Y)\n\t> Cancel (N)\n");
+						char usrInput;
+						scanf(" %s", &usrInput);
+						if (usrInput == 'Y' || usrInput == 'y') {
+							mmInput = 'E';
+						}
+						else {
+							mmInput = 'Q';
+						}
+					}
 					break;
 				case 'q':
 				case 'Q':
 					userSatisfied = true;
-					sentinel = false;
+					//sentinel = false;
+					freeMallocedSeats();
+					return(0);
 					break;
+
 				// Default case represents any other input (economy)
+				// Economy class booking
+				default: ;
+					char usrInput = 'N';
+					if (numEconomyClassSeats(seatMatrix) > 0) {
+						if (numPriorityEconomySeats(seatMatrix) > 0) {
+							printf("Would you like Priority Economy seating? (y / n)\n");
+							scanf(" %c", &usrInput);
+						}
+
+						if (usrInput == 'Y' || usrInput == 'y') {
+							assnmt = getEmptySeatBetweenRows(seatMatrix, 7, 7);
+							assignedSeat = convertMatrixEntryToSeat(seatMatrix, assnmt->i, assnmt->j);
+							while (!confirmInitSelection(assignedSeat)) {
+								free(assnmt);
+								free(assignedSeat);
+								assnmt = getEmptySeatBetweenRows(seatMatrix, 7, 7);
+								assignedSeat = convertMatrixEntryToSeat(seatMatrix, assnmt->i, assnmt->j);
+							}
+						}
+						else {
+							assnmt = getEmptySeatBetweenRows(seatMatrix, 7, 14);
+							assignedSeat = convertMatrixEntryToSeat(seatMatrix, assnmt->i, assnmt->j);
+							while (!confirmInitSelection(assignedSeat)) {
+								free(assnmt);
+								free(assignedSeat);
+								assnmt = getEmptySeatBetweenRows(seatMatrix, 7, 14);
+								assignedSeat = convertMatrixEntryToSeat(seatMatrix, assnmt->i, assnmt->j);
+							}
+						}
+						
+						// Now that we have a seat, we ask about upgrades.
+						printf("Would you like to upgrade to...\n\t> First Class (F)\n\t> Business Class (B)\n\t> No thanks (N)\n");
+						scanf(" %c", &usrInput);
+						switch (usrInput) {
+							case 'f':
+							case 'F':
+								free(assignedSeat);
+								mmInput = 'F';
+								break;
+							case 'b':
+							case 'B':
+								free(assignedSeat);
+								mmInput = 'B';
+								break;
+							default:
+									assignedSeat->name = getNameInput();
+									registerSeatInGlobalArray(assignedSeat, assnmt);
+									seatMatrix[assnmt->i][assnmt->j] = 1;
+									userSatisfied = true;
+									printConfirmation(assignedSeat);
+								break;
+						}
+						free (assnmt);
+					}
+					else {
+						printf("Sorry, but Economy class is full. Would you like to upgrade?\n\t> Business (B)\n\t> First (F)\n\t> Cancel (C)\n");
+						scanf(" %c", &usrInput);
+						switch (usrInput) {
+							case 'b':
+							case 'B':
+								mmInput = 'B';
+								break;
+							case 'f':
+							case 'F':
+								mmInput = 'F';
+								break;
+							default:
+								mmInput = 'Q';
+								break;
+						}
+					}
+					break;
+			}
+		}
+		
+		// Post-Booking options
+		userSatisfied = false;
+		while (!userSatisfied) {
+			char usrInput;
+			printf("Options\n-------\n\t(1) Show seating chart\n\t(2) Print manifest\n\t(3) Print boarding pass\n\t(other) Book another ticket\n");
+			scanf(" %c", &usrInput);
+			switch (usrInput) {
+				case '1':
+					printSeatingChart(seatMatrix);
+					break;
+				case '2':
+					printManifest();
+					break;
+				case '3': ;
+					char letter;
+					int seatNo;
+					printf("Enter the seat number (e.g. A1):  ");
+					scanf(" %c%d", &letter, &seatNo);
+					printBoardingPass(letter, seatNo);
+					break;
 				default:
-					//TODO
+					userSatisfied = true;
 					break;
 			}
 		}
 	}
-
-	freeMallocedSeats();
-	return(0);
 }
 
 bool confirmInitSelection(Seat *assignedSeat) {
@@ -273,7 +484,7 @@ char* getNameInput() {
 	// scanf user input into a 255 character-max C string as a temp, then malloc the appropriate size and copy
 	char temp[256];
 	printf("Please enter your name:  ");
-	scanf(" %255s", temp);
+	scanf(" %255[^\n]s", temp);
 
 	char* ptr = (char*) malloc(strlen(temp) + 1); // add 1 for '\0' character
 	strcpy(ptr, temp);
@@ -282,6 +493,78 @@ char* getNameInput() {
 
 void registerSeatInGlobalArray(Seat* seat, Pair* pos) {
 	seatPointersArr[(pos->i * ROWS) + pos->j] = seat;
+}
+
+void printConfirmation(Seat *seat) {
+	printf("\nSuccesfully booked seat %c%d for %s!\n\n", seat->letter, seat->seatNo, seat->name);
+}
+
+void printSeatingChart(int seatMatrix[ROWS][SEATS_PER_ROW]) {
+	printf("O = empty, X = occupied\n");
+	printf("A\t");
+	int i;
+	for (i = 0; i < ROWS; i++) {
+		printf("%c ", seatMatrix[i][0] == 1 ? 'X' : 'O');
+	}
+	printf("\n");
+	printf("B\t");
+	for (i = 0; i < ROWS; i++) {
+		printf("%c ", seatMatrix[i][1] == 1 ? 'X' : 'O');
+	}
+	printf("\n\n");
+	printf("D\t");
+	for (i = 0; i < ROWS; i++) {
+		printf("%c ", seatMatrix[i][2] == 1 ? 'X' : 'O');
+	}
+	printf("\n");
+	printf("E\t");
+	for (i = 0; i < ROWS; i++) {
+		printf("%c ", seatMatrix[i][3] == 1 ? 'X' : 'O');
+	}
+	printf("\n");
+	printf("F\t");
+	for (i = 0; i < ROWS; i++) {
+		printf("%c ", seatMatrix[i][4] == 1 ? 'X' : 'O');
+	}
+	printf("\n\n");
+	printf("H\t");
+	for (i = 0; i < ROWS; i++) {
+		printf("%c ", seatMatrix[i][5] == 1 ? 'X' : 'O');
+	}
+	printf("\n");
+	printf("I\t");
+	for (i = 0; i < ROWS; i++) {
+		printf("%c ", seatMatrix[i][6] == 1 ? 'X' : 'O');
+	}
+	printf("\n");
+}
+
+void printManifest(void) {
+	printf("\nMANIFEST\n\n%-32s %4s\n-------------------------------------\n", "Name", "Seat");
+	int i;
+	for (i = 0; i < (ROWS * SEATS_PER_ROW); i++) {
+		if (seatPointersArr[i] != NULL) {
+			printf("%-32s %c%d\n", seatPointersArr[i]->name, seatPointersArr[i]->letter, seatPointersArr[i]->seatNo);
+		}
+	}
+	printf("\n");
+}
+
+void printBoardingPass(char letter, int seatNo) {
+	int i;
+	for (i = 0; i < ROWS * SEATS_PER_ROW; i++) {
+		if (seatPointersArr[i] != NULL) {
+			if (seatPointersArr[i]->letter == letter && seatPointersArr[i]->seatNo == seatNo) {
+				printf("\nName: %s\nSeat: %c%d\n", seatPointersArr[i]->name, letter, seatNo);
+				if (seatNo < 22) { printf("Level: First Class\n"); }
+				else if (seatNo < 50) { printf("Level: Business Class\n"); }
+				else if (seatNo < 57) { printf("Level: Priority Economy\n"); }
+				else { printf("Level: Economy\n"); }
+				return;
+			}
+		}
+	}
+	printf("\nBoarding pass not available!\n");
 }
 
 /*
