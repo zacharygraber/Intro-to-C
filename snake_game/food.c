@@ -5,8 +5,8 @@
 * Author: Manisha Suresh Kumar
 * Maintainer:
 * Created: Sat Sep 12 13:16:12 2020
-* Last-Updated: September 12 16:51 2020
-*	  By: Manisha Suresh Kumar
+* Last-Updated: October 5 2020
+*	  By: Zachary E Graber (zegraber@iu.edu)
 *
 */
 
@@ -17,7 +17,8 @@
 */
 
 /* Change log:
-*
+*  
+*  + added logic for remove_eaten_food function
 *
 */
 
@@ -72,9 +73,38 @@ void add_new_food(Food* foods, Food* new_food){
     temp->next = new_food;
 }
 
-
+// Given a food at x, y, removes it from foods and returns the type of the food
 enum Type remove_eaten_food(Food* foods, int x, int y){
-    //Implement the code to remove food eaten by the snake
+    char typeOfFood;
+    Food *temp = foods;
+    while (temp) {
+	if (temp->x == x && temp->y == y) {
+	    typeOfFood = temp->type;
+	    break;
+	}
+	else {
+	    temp = temp->next;
+	}
+    }
+
+    // Now that we have the food in question, we delete it as if it were a node in a singly-linked list.
+    if (temp == foods) {
+	printf("HERE\n");
+	foods = temp->next; // Consider the edge case where the food in question is the first one
+	return typeOfFood == 'O' ? Increase : Decrease;
+    }
+    else {
+	// Traverse the list until we reach the node before temp
+	Food *oneBeforeTemp = foods;
+	while (oneBeforeTemp->next != temp) {
+	    oneBeforeTemp = oneBeforeTemp->next;
+	}
+	// Once we've found it, replace its 'next' attribute with temp's 'next'
+    	oneBeforeTemp->next = temp->next;
+    }
+
+    free(temp);
+    return typeOfFood == 'O' ? Increase : Decrease;
 }
 
 // Display all the food
