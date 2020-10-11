@@ -211,7 +211,7 @@ void game(){
 
 	    // Check to see if the snake's head is now in a food
 	    if (food_exists(foods, snake->x, snake->y)) {
-		switch (remove_eaten_food(foods, snake->x, snake->y)) {
+		switch (remove_eaten_food(&foods, snake->x, snake->y)) {
 		    case Increase:
 			score += 20;
 			(get_end(snake))->next = create_tail(endX, endY); // Add another tail on the end

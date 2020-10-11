@@ -5,7 +5,7 @@
 * Author: Manisha Suresh Kumar
 * Maintainer:
 * Created: Sat Sep 12 13:16:12 2020
-* Last-Updated: October 5 2020
+* Last-Updated: October 11 2020
 *	  By: Zachary E Graber (zegraber@iu.edu)
 *
 */
@@ -73,38 +73,44 @@ void add_new_food(Food* foods, Food* new_food){
     temp->next = new_food;
 }
 
-// Given a food at x, y, removes it from foods and returns the type of the food
-enum Type remove_eaten_food(Food* foods, int x, int y){
-    char typeOfFood;
-    Food *temp = foods;
-    while (temp) {
-	if (temp->x == x && temp->y == y) {
-	    typeOfFood = temp->type;
-	    break;
+// A function dedicated to returning the type of food at a point x, y
+enum Type type_of_food(Food* foods, int x, int y) {
+	char typeOfFood;
+	Food *temp = foods;
+	while (!(temp->x == x && temp->y == y)) {
+		temp = temp->next;
 	}
-	else {
-	    temp = temp->next;
-	}
-    }
+	typeOfFood = temp->type;
+	return typeOfFood == 'O' ? Increase : Decrease;	
+}
 
-    // Now that we have the food in question, we delete it as if it were a node in a singly-linked list.
-    if (temp == foods) {
-	printf("HERE\n");
-	foods = temp->next; // Consider the edge case where the food in question is the first one
-	return typeOfFood == 'O' ? Increase : Decrease;
+// Given a food at x, y, removes it from foods and returns the type of food that it was
+enum Type remove_eaten_food(Food** foodsPtr, int x, int y){
+    // Get type of food at the position
+    char typeOfFood = type_of_food(*foodsPtr, x, y);
+
+    // Remove the eaten food.
+    // Since the list of foods is just a singly-linked list, we use a standard node deletion algorithm.
+    Food* temp = *foodsPtr;
+    
+    // First, consider the edge case where the food in question is the first node in the list.
+    if (temp->x == x && temp->y == y) {
+	Food* firstNode = *foodsPtr; // Make a temporary ptr to store the first node's address
+	*foodsPtr = (*foodsPtr)->next; // Set the first node to the next one
+	free(firstNode);
     }
     else {
-	// Traverse the list until we reach the node before temp
-	Food *oneBeforeTemp = foods;
-	while (oneBeforeTemp->next != temp) {
-	    oneBeforeTemp = oneBeforeTemp->next;
+	// Search for the node BEFORE the one we're trying to delete.
+	while (!((temp->next)->x == x && (temp->next)->y == y)) {
+		temp = temp->next;
 	}
-	// Once we've found it, replace its 'next' attribute with temp's 'next'
-    	oneBeforeTemp->next = temp->next;
+	// Now that we have the node before...
+	Food* deletedNode = temp->next; // Save a ptr to store the address of the node we're gonna delete
+	temp->next = deletedNode->next; // Bypass the node we're deleting
+	free(deletedNode); // Free it
     }
-
-    free(temp);
-    return typeOfFood == 'O' ? Increase : Decrease;
+	
+    return typeOfFood;
 }
 
 // Display all the food
