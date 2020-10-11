@@ -4,7 +4,7 @@
  *   Contents: Contains all the main logic and main loop for the game
  *   Original Author Unknown.
  *   Most recent edit: 
- *   	Date: 10/5/2020
+ *   	Date: 10/11/2020
  *	Editor: Zachary E Graber (zegraber@iu.edu)
  *
  */
@@ -114,6 +114,33 @@ void game(){
 	    }
 
             break;
+	case PAUSED:
+	    clear();
+	    int x, y; // Middle of the game board
+	    x = window->upper_left_x + (window->width / 2);
+	    y = window->upper_left_y + (window->height / 2);
+
+	    draw_Gamewindow(window);
+
+	    mvprintw(y-6, x-15, "______                        _ ");
+	    mvprintw(y-5, x-15, "| ___ \\                      | |");
+	    mvprintw(y-4, x-15, "| |_/ /_ _ _   _ ___  ___  __| |");
+	    mvprintw(y-3, x-15, "|  __/ _` | | | / __|/ _ \\/ _` |");
+	    mvprintw(y-2, x-15, "| | | (_| | |_| \\__ \\  __/ (_| |");
+	    mvprintw(y-1, x-15, "\\_|  \\__,_|\\__,_|___/\\___|\\__,_|");
+
+	    mvprintw(y+2, x-3, " ____ "); 
+	    mvprintw(y+3, x-3, "||P ||");
+	    mvprintw(y+4, x-3, "||__||");
+ 	    mvprintw(y+5, x-3, "|/__\\|");
+	    mvprintw(y+7, x-3, "UNPAUSE");
+
+	    ch = get_char();
+	    if (ch == 'p' || ch == 'P') {
+		state = ALIVE;
+	    }
+
+	    break;
 
         case INIT:
 	    // Setting height and width of the board
@@ -201,6 +228,12 @@ void game(){
 			window = changeGameWindow(window->upper_left_x + 5, window->upper_left_y + 5, window->width - 10, window->height - 10, window);
 			boardIncreases -= 1;
 		    }
+		    break;
+
+		// Pausing
+		case 'p':
+		case 'P':
+		    state = PAUSED;
 		    break;
 	    }
 
