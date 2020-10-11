@@ -5,8 +5,8 @@
  * Author: Rishabh Agrawal
  * Maintainer:
  * Created: Sun Sep 13 21:01:02 2020
- * Last-Updated: September 13 22:43 2020
- *           By: Rishabh Agrawal
+ * Last-Updated: October 5 2020
+ *           By: Zachary Graber (zegraber@iu.edu)
  *
  */
 
@@ -18,6 +18,7 @@
 
 /* Change log:
  *
+ * + added prototype for function get_end
  *
  */
 
@@ -50,3 +51,4 @@ void draw_snake(Snake* snake);
 bool eat_itself(Snake* snake);
 Snake* remove_tail(Snake* snake);
 int len(Snake* snake);
+Snake* get_end(Snake* snake);
