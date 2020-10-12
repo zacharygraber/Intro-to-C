@@ -343,7 +343,7 @@ void game(){
 		case 'f':
 		case 'F':;
 			// Create and open a new file "./saves/save_n.game", where n is the number of the save
-			char fName[19 + (int)(floor(log10(numSaves)))];
+			char fName[numSaves > 0 ? 19 + (int)(floor(log10(numSaves))) : 20];
 			sprintf(fName, "./saves/save_%d.game", numSaves + 1);
 			
 			// Update the number of saves
@@ -358,8 +358,31 @@ void game(){
 			fprintf(fPtr, "scoreThisLevel: %d\n", scoreThisLevel);
 			fprintf(fPtr, "boardIncreases: %d\n", boardIncreases);
 			fprintf(fPtr, "timeret.tv_nsec: %Ld\n", timeret.tv_nsec);
+			fprintf(fPtr, "snakeDir: %d\n", snakeDir);
+
 			fprintf(fPtr, "snake: {");
-			// TODO: This is unfinished. I plan to store the linkedlists in a way similar to JSON.
+			Snake *tempSnake = snake;
+			while (tempSnake) {
+				fprintf(fPtr, "x: %d, y: %d %c", tempSnake->x, tempSnake->y, tempSnake->next ? ';' : '}');
+				tempSnake = tempSnake->next;
+			}
+			fprintf(fPtr, "\n");
+
+			fprintf(fPtr, "foods: {");
+			Food *tempFoods = foods;
+			while (tempFoods) {
+				fprintf(fPtr, "x: %d, y: %d, type: %c %c", tempFoods->x, tempFoods->y, tempFoods->type, tempFoods->next ? ';' : '}');
+				tempFoods = tempFoods->next;
+			}
+			fprintf(fPtr, "\n");
+
+			fprintf(fPtr, "obstacles: {");
+			Obstacle *tempObst = obstacles;
+			while (tempObst) {
+				fprintf(fPtr, "x: %d, y: %d, size: %d %c", tempObst->x, tempObst->y, tempObst->size, tempObst->next ? ';' : '}');
+				tempObst = tempObst->next;
+			}
+
 			fclose(fPtr);
 			break;
 	    }
