@@ -18,6 +18,7 @@
 #include "game_window.h"
 #include "key.h"
 #include "game.h"
+#include "obstacle.h"
 
 void generate_points(int *food_x, int *food_y, int width, int height, int x_offset, int y_offset){
     *food_x = rand() % width + x_offset;
@@ -32,6 +33,7 @@ void game(){
     gamewindow_t *window; // Name of the board
     Snake *snake; // The snake
     Food *foods,*new_food; // List of foods (Not an array)
+    Obstacle *obstacles, *new_obstacle; // List of obstacles.
     int snakeDir; // The current direction the snake is moving.
     Snake *endOfTail; // The end of the snake's tail
     int endX; // X location of end of tail
@@ -81,10 +83,10 @@ void game(){
 	    mvprintw(16, 5, "||__||    QUIT");
 	    mvprintw(17, 5, "|/__\\|");
 
-	    mvprintw(9, 60, "Scoring");
-	    mvprintw(10, 53, "---------------------");
-	    mvprintw(11, 55, "+20 per good food: o");
-	    mvprintw(12, 55, "-10 per bad food: x");
+	    mvprintw(9, 62, "Scoring");
+	    mvprintw(10, 53, "-------------------------");
+	    mvprintw(11, 55, "+20 per good food: o/+");
+	    mvprintw(12, 55, "-10 per bad food: x/-");
 
 	    mvprintw(18, 38, " ____ "); 
 	    mvprintw(19, 38, "||^ ||");
@@ -222,32 +224,49 @@ void game(){
             // Init snake
             snake = init_snake(x_offset + (width / 2), y_offset + (height / 2));
             
-            // Init foods
-            int food_x, food_y, num_foods;
+            // Init foods & obstacles
+            int food_x, food_y, num_foods, num_obstacles, size;
             enum Type type;
 
 	    // Change difficulty-specific settings
 	    switch (difficulty) {
 		case EASY:
 		    num_foods = 5;
+		    num_obstacles = 1;
 		    break;
 		case NORMAL:
 		    num_foods = 10;
+		    num_obstacles = 2;
 		    timeret.tv_nsec /= 2;
 		    break;
 		case HARD:
 		    num_foods = 20;
+		    num_obstacles = 4;
 		    timeret.tv_nsec /= 4;
 		    break;
 	    }
 
+	    // Generate num_obstacles obstacles
+	    size = (rand() % 4) + 1; // Randomly determine a size between 1 and 4.
+	    generate_points(&food_x, &food_y, width - size, height - size, x_offset, y_offset); // we offset by size so bigger obstacles dont spawn outside the borders
+            obstacles = create_obstacle(food_x, food_y, size);
+            for(i = 1; i < num_obstacles; i++){
+		size = (rand() % 4) + 1;
+                generate_points(&food_x, &food_y, width - size, height - size, x_offset, y_offset);
+                while (obstacle_exists(obstacles,food_x, food_y))
+                    generate_points(&food_x, &food_y, width - size, height - size, x_offset, y_offset);
+                new_obstacle = create_obstacle(food_x, food_y, size);
+                add_new_obstacle(obstacles, new_obstacle);
+            }
+
+	    
             // Generate num_foods foods
             generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
             type = (rand() > RAND_MAX/2) ? Increase : Decrease; // Randomly deciding type of food
             foods = create_food(food_x, food_y, type);
             for(i = 1; i < num_foods; i++){
                 generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
-                while (food_exists(foods,food_x, food_y))
+                while (food_exists(foods,food_x, food_y) || obstacle_exists(obstacles, food_x, food_y))
                     generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
                 type = (rand() > RAND_MAX/2) ? Increase : Decrease;
                 new_food = create_food(food_x, food_y, type);
@@ -354,6 +373,7 @@ void game(){
 	    mvprintw(0, 0, "Score:  %d", score);
             draw_Gamewindow(window);
             draw_snake(snake);
+	    draw_obstacles(obstacles);
             draw_food(foods);
             break;
 
