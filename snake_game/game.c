@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
+#include <math.h>
 #include "snake.h"
 #include "food.h"
 #include "game_window.h"
@@ -41,6 +43,7 @@ void game(){
     int score;
     int scoreThisLevel;
     int boardIncreases = 0;
+    int num_saves = num_saves();
 
     const int height = 30; 
     const int width = 70;
@@ -335,6 +338,30 @@ void game(){
 		case 'P':
 		    state = PAUSED;
 		    break;
+
+		// Saving
+		case 'f':
+		case 'F':
+			// Create and open a new file "./saves/save_n.game", where n is the number of the save
+			char fName[19 + (int)(floor(log10(num_saves)))];
+			sprintf(fName, "./saves/save_%d.game", num_saves + 1);
+			
+			// Update the number of saves
+			num_saves += 1;
+			FILE *fPtr = fopen("./saves/num_saves.game", "wb");
+			fwrite(&num_saves, sizeof(int), 1, fPtr);
+			fclose(fPtr);
+
+			// Write the save file
+			fPtr = fopen(fName, w);
+			fprintf(fPtr, "score: %d\n", score);
+			fprintf(fPtr, "scoreThisLevel: %d\n", scoreThisLevel);
+			fprintf(fPtr, "boardIncreases: %d\n", boardIncreases);
+			fprintf(fPtr, "timeret.tv_nsec: %Ld\n", timeret.tv_nsec);
+			fprintf(fPtr, "snake: {");
+			// TODO: This is unfinished. I plan to store the linkedlists in a way similar to JSON.
+			fclose(fPtr);
+			break;
 	    }
 
 	    // Move the snake (if the player has entered a direction yet
@@ -418,6 +445,15 @@ void game(){
 	        mvprintw(10, 54,"||__||");
 	        mvprintw(11,54, "|/__\\|");
 
+		mvprintw(15, 0, "Your Score:  %d", score);
+
+		mvprintw(17, 0, "TOP 10");
+		mvprintw(18, 0, "------");
+		int top10[10] = top_10();
+		for (i = 0; i < 10; i++) {
+			mvprintw(19 + i, 0, "%d", top10[i]);
+		}
+
 		ch = get_char();
 		switch (ch) {
 			case 'q':
@@ -435,4 +471,45 @@ void game(){
     }
     clear();
     endwin();
+}
+
+int num_saves() {
+	int num_saves;
+	FILE *fPtr = fopen("./saves/num_saves.game", "rb"); // Will point to ./saves/num_saves.game
+	if (fPtr == NULL) {
+		num_saves = 0;
+		// Open the file in write mode and write 0 into it.
+		fPtr = fopen("./saves/num_saves.game", "wb");
+		fwrite(&num_saves, sizeof(int), 1, fPtr);
+		fclose(fPtr);
+	}
+	else {
+		fread(&num_saves, sizeof(int), 1, fPtr);
+		fclose(fPtr);
+	}
+	return num_saves;
+}
+
+void top_10(int *top10Ptr) {
+	FILE *fPtr = fopen("./saves/save_best_10.game", "rb");
+	if (fPtr == NULL) {
+		int top10[10] = { 0 };
+		fPtr = fopen("./savese/save_best_10.game", "wb");
+		fwrite(top10, sizeof(top10), 1, fPtr);
+		fclose(fPtr);
+		int i;
+		for (i = 0; i < 10; i++) {
+			top10Ptr[i] = top10[i]
+		}
+	}
+	else {
+		int top10[10];
+		fread(&top10, sizeof(top10), 1, fPtr);
+		fclose(fPtr);
+		int i;
+		for (i = 0; i < 10; i++) {
+			top10Ptr[i] = top10[i]
+		}
+
+	}
 }
