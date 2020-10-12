@@ -43,10 +43,10 @@ Food* create_food(int x, int y, enum Type type){
     new_food->x = x;
     new_food->y = y;
     if (type == Increase){
-        new_food->type = 'O';
+        new_food->type = (rand() > RAND_MAX / 2) ? 'O' : '+';
     }
     else if(type == Decrease){
-        new_food->type = 'X';
+        new_food->type = (rand() > RAND_MAX / 2) ? 'X' : '-';
     }
     new_food->next = NULL;
 
@@ -81,7 +81,7 @@ enum Type type_of_food(Food* foods, int x, int y) {
 		temp = temp->next;
 	}
 	typeOfFood = temp->type;
-	return typeOfFood == 'O' ? Increase : Decrease;	
+	return (typeOfFood == 'O' || typeOfFood == '+') ? Increase : Decrease;	
 }
 
 // Given a food at x, y, removes it from foods and returns the type of food that it was

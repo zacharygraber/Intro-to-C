@@ -26,6 +26,7 @@ void generate_points(int *food_x, int *food_y, int width, int height, int x_offs
 
 void game(){
     enum State state = MENU; // Set the initial state
+    enum Difficulty difficulty = NORMAL; // Difficulty of the game.
     static int x_max, y_max; //Max screen size variables
     static int x_offset, y_offset; // distance between the top left corner of your screen and the start of the board
     gamewindow_t *window; // Name of the board
@@ -106,14 +107,80 @@ void game(){
 
 		// Start cases
 		case 's':
-		    state = INIT;
+		    state = DIFFICULTY_SELECT;
 		    break;
 		case 'S':
+		    state = DIFFICULTY_SELECT;
+		    break;
+	    }
+            break;
+	case DIFFICULTY_SELECT:
+	    clear();
+	    mvprintw(0, 20, "______ _  __  __ _            _ _");
+	    mvprintw(1, 20, "|  _  (_)/ _|/ _(_)          | | |");
+	    mvprintw(2, 20, "| | | |_| |_| |_ _  ___ _   _| | |_ _   _ ");
+	    mvprintw(3, 20, "| | | | |  _|  _| |/ __| | | | | __| | | |");
+	    mvprintw(4, 20, "| |/ /| | | | | | | (__| |_| | | |_| |_| |");
+	    mvprintw(5, 20, "|___/ |_|_| |_| |_|\\___|\\__,_|_|\\__|\\__, |");
+	    mvprintw(6, 20, "                                     __/ |");
+	    mvprintw(7, 20, "                                    |___/ ");
+
+	    mvprintw(12, 38, "NORMAL");
+	    mvprintw(12, 20, "EASY");
+	    mvprintw(12, 57, "HARD");
+	    
+	    int selectionBoxX;
+	    switch (difficulty) {
+		case EASY:
+		    selectionBoxX = 17;
+		    break;
+		case NORMAL:
+		    selectionBoxX = 36;
+		    break;
+		case HARD:
+		    selectionBoxX = 54;
+		    break;
+	    }
+	    mvprintw(10, selectionBoxX, " --------");
+	    int i;
+	    for (i = 11; i < 14; i++) {
+		mvprintw(i, selectionBoxX, "|");
+		mvprintw(i, selectionBoxX + 9, "|");
+	    }
+	    mvprintw(14, selectionBoxX, " --------");
+	
+	    mvprintw(18, 21, "SELECT");
+	    mvprintw(20, 17, " ____    ____"); 
+	    mvprintw(21, 17, "||<-||  ||->||");
+	    mvprintw(22, 17, "||__||  ||__||");
+ 	    mvprintw(23,17, "|/__\\|  |/__\\|");
+	    
+	    mvprintw(18, 51, "CONFIRM");
+	    mvprintw(20, 48, " ____________"); 
+	    mvprintw(21, 48, "||   ENTER  ||");
+	    mvprintw(22, 48, "||__________||");
+ 	    mvprintw(23, 48, "|/__________\\|");
+
+	    ch = get_char();
+	    switch (ch) {
+		case LEFT:
+		    if (difficulty == HARD)
+			difficulty = NORMAL;
+		    else if (difficulty == NORMAL)
+			difficulty = EASY;
+		    break;
+		case RIGHT:
+		    if (difficulty == EASY)
+			difficulty = NORMAL;
+		    else if (difficulty == NORMAL)
+			difficulty = HARD;
+		    break;
+		case '\n':
 		    state = INIT;
 		    break;
 	    }
+	    break;
 
-            break;
 	case PAUSED:
 	    clear();
 	    int x, y; // Middle of the game board
@@ -155,7 +222,7 @@ void game(){
             snake = init_snake(x_offset + (width / 2), y_offset + (height / 2));
             
             // Init foods
-            int food_x, food_y, i;
+            int food_x, food_y;
             enum Type type;
 
             //Generate 20 foods
