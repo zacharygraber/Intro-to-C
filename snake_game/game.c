@@ -37,6 +37,7 @@ void game(){
     int endX; // X location of end of tail
     int endY; // Y location of end of tail
     int score = 0;
+    int scoreThisLevel = 0;
     int boardIncreases = 0;
 
     const int height = 30; 
@@ -222,14 +223,29 @@ void game(){
             snake = init_snake(x_offset + (width / 2), y_offset + (height / 2));
             
             // Init foods
-            int food_x, food_y;
+            int food_x, food_y, num_foods;
             enum Type type;
 
-            //Generate 20 foods
+	    // Change difficulty-specific settings
+	    switch (difficulty) {
+		case EASY:
+		    num_foods = 5;
+		    break;
+		case NORMAL:
+		    num_foods = 10;
+		    timeret.tv_nsec /= 2;
+		    break;
+		case HARD:
+		    num_foods = 20;
+		    timeret.tv_nsec /= 4;
+		    break;
+	    }
+
+            // Generate num_foods foods
             generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
             type = (rand() > RAND_MAX/2) ? Increase : Decrease; // Randomly deciding type of food
             foods = create_food(food_x, food_y, type);
-            for(i = 1; i < 20; i++){
+            for(i = 1; i < num_foods; i++){
                 generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
                 while (food_exists(foods,food_x, food_y))
                     generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
@@ -245,11 +261,6 @@ void game(){
 	    endOfTail = get_end(snake);
 	    endX = endOfTail->x;
 	    endY = endOfTail->y;
-		
-	    // Scale the timescale with the score.	
-	    if (score >= 100) {
-	        timeret.tv_nsec = (999999999 / 4) / (1.5 * (score / 100));
-	    }
 
             ch = get_char();
 	    switch (ch) {
@@ -314,10 +325,16 @@ void game(){
 		switch (remove_eaten_food(&foods, snake->x, snake->y)) {
 		    case Increase:
 			score += 20;
+			scoreThisLevel += 20;
+			if (scoreThisLevel >= 100) {
+			    timeret.tv_nsec /= 1.5;
+			    scoreThisLevel -= 100;
+			}
 			(get_end(snake))->next = create_tail(endX, endY); // Add another tail on the end
 			break;
 		    case Decrease:
 			score -= 10;
+			scoreThisLevel -= 10;
 			snake = remove_tail(snake);
 			break;
 		}
