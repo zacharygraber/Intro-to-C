@@ -44,6 +44,7 @@ void game(){
     int scoreThisLevel;
     int boardIncreases = 0;
     int numSaves = num_saves();
+    bool checkedHighScores;
 
     const int height = 30; 
     const int width = 70;
@@ -218,6 +219,7 @@ void game(){
         case INIT:
 	    score = 0;
 	    scoreThisLevel = 0;
+	    checkedHighScores = false;
 
 	    // Setting height and width of the board
             x_offset = (x_max / 2) - (width / 2);
@@ -472,8 +474,36 @@ void game(){
 
 		mvprintw(17, 0, "TOP 10");
 		mvprintw(18, 0, "------");
-		int top10_scores[10];
-		top_10(top10_scores);
+		static int top10_scores[10];
+
+		// We only want this to run once, not every loop.
+		if (!checkedHighScores) {
+			top_10(top10_scores);
+
+			// Search through the array to see if this is a new high score.
+			int newScoreIndex = -1;
+			for (i = 0; i < 10; i++) {
+				if (score > top10_scores[i]) {
+					newScoreIndex = i;
+					break;
+				}
+			}
+			if (newScoreIndex != -1) { // A value that's not -1 signifies that we need to shift things around
+				// Move the 9th element to place 10, 8th to place 9, etc, shifting down from newScoreIndex.
+				for (i = 8; i >= newScoreIndex; i--) {
+					top10_scores[i+1] = top10_scores[i];
+				}
+				top10_scores[newScoreIndex] = score; // Insert the score in the hole we just made
+
+				// Update the file
+				FILE *fPtr = fopen("./saves/saves_best_10.game", "wb");
+				fwrite(top10_scores, sizeof(int), 10, fPtr);
+				fclose(fPtr);
+			}
+			checkedHighScores = true;
+		}
+
+		// Print out the top 10 scores
 		for (i = 0; i < 10; i++) {
 			mvprintw(19 + i, 0, "%d", top10_scores[i]);
 		}
