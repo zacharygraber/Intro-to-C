@@ -43,7 +43,7 @@ void game(){
     int score;
     int scoreThisLevel;
     int boardIncreases = 0;
-    int num_saves = num_saves();
+    int numSaves = num_saves();
 
     const int height = 30; 
     const int width = 70;
@@ -341,19 +341,19 @@ void game(){
 
 		// Saving
 		case 'f':
-		case 'F':
+		case 'F':;
 			// Create and open a new file "./saves/save_n.game", where n is the number of the save
-			char fName[19 + (int)(floor(log10(num_saves)))];
-			sprintf(fName, "./saves/save_%d.game", num_saves + 1);
+			char fName[19 + (int)(floor(log10(numSaves)))];
+			sprintf(fName, "./saves/save_%d.game", numSaves + 1);
 			
 			// Update the number of saves
-			num_saves += 1;
+			numSaves += 1;
 			FILE *fPtr = fopen("./saves/num_saves.game", "wb");
-			fwrite(&num_saves, sizeof(int), 1, fPtr);
+			fwrite(&numSaves, sizeof(int), 1, fPtr);
 			fclose(fPtr);
 
 			// Write the save file
-			fPtr = fopen(fName, w);
+			fPtr = fopen(fName, "w");
 			fprintf(fPtr, "score: %d\n", score);
 			fprintf(fPtr, "scoreThisLevel: %d\n", scoreThisLevel);
 			fprintf(fPtr, "boardIncreases: %d\n", boardIncreases);
@@ -449,9 +449,10 @@ void game(){
 
 		mvprintw(17, 0, "TOP 10");
 		mvprintw(18, 0, "------");
-		int top10[10] = top_10();
+		int top10_scores[10];
+		top_10(top10_scores);
 		for (i = 0; i < 10; i++) {
-			mvprintw(19 + i, 0, "%d", top10[i]);
+			mvprintw(19 + i, 0, "%d", top10_scores[i]);
 		}
 
 		ch = get_char();
@@ -491,25 +492,19 @@ int num_saves() {
 }
 
 void top_10(int *top10Ptr) {
-	FILE *fPtr = fopen("./saves/save_best_10.game", "rb");
-	if (fPtr == NULL) {
-		int top10[10] = { 0 };
-		fPtr = fopen("./savese/save_best_10.game", "wb");
-		fwrite(top10, sizeof(top10), 1, fPtr);
+	FILE *fPtr = fopen("./saves/saves_best_10.game", "rb");
+	int top10[10] = { 0 };
+	if (fPtr == NULL) { 
+		fPtr = fopen("./saves/save_best_10.game", "wb");
+		fwrite(top10, sizeof(int), 10, fPtr);
 		fclose(fPtr);
-		int i;
-		for (i = 0; i < 10; i++) {
-			top10Ptr[i] = top10[i]
-		}
 	}
 	else {
-		int top10[10];
-		fread(&top10, sizeof(top10), 1, fPtr);
+		fread(top10, sizeof(int), 10, fPtr);
 		fclose(fPtr);
-		int i;
-		for (i = 0; i < 10; i++) {
-			top10Ptr[i] = top10[i]
-		}
-
+	}
+	int i;
+	for (i = 0; i < 10; i++) {
+		top10Ptr[i] = top10[i];
 	}
 }
