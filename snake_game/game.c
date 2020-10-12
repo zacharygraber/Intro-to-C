@@ -38,8 +38,8 @@ void game(){
     Snake *endOfTail; // The end of the snake's tail
     int endX; // X location of end of tail
     int endY; // Y location of end of tail
-    int score = 0;
-    int scoreThisLevel = 0;
+    int score;
+    int scoreThisLevel;
     int boardIncreases = 0;
 
     const int height = 30; 
@@ -213,6 +213,9 @@ void game(){
 	    break;
 
         case INIT:
+	    score = 0;
+	    scoreThisLevel = 0;
+
 	    // Setting height and width of the board
             x_offset = (x_max / 2) - (width / 2);
             y_offset = (y_max / 2) - (height / 2);
@@ -352,9 +355,14 @@ void game(){
 			(get_end(snake))->next = create_tail(endX, endY); // Add another tail on the end
 			break;
 		    case Decrease:
-			score -= 10;
-			scoreThisLevel -= 10;
-			snake = remove_tail(snake);
+			if (len(snake) > 1) {
+			    score -= 10;
+			    scoreThisLevel -= 10;
+			    snake = remove_tail(snake);
+			}
+			else {
+			    state = DEAD;
+			}
 			break;
 		}
 		// spawn another food
@@ -365,6 +373,19 @@ void game(){
                 type = (rand() > RAND_MAX/2) ? Increase : Decrease;
                 new_food = create_food(food_x, food_y, type);
                 add_new_food(foods, new_food);
+	    }
+		
+	    // Check for collisions with walls
+	    if (snake->x <= window->upper_left_x || snake->y <= window->upper_left_y || snake->x >= window->upper_left_x + window->width || snake->y >= window->upper_left_y + window->height) {
+		state = DEAD;
+	    }
+	    // Check for collisions with obstacles
+	    if (obstacle_exists(obstacles, snake->x, snake->y)) {
+		state = DEAD;
+	    }
+	    // Check for collisions with the snake itself
+	    if (len(snake) > 1 && eat_itself(snake)) {
+		state = DEAD;
 	    }
 
 	    // Draw everything on the screen
@@ -378,8 +399,36 @@ void game(){
             break;
 
         case DEAD:
-            endwin();
-            break;
+		clear();
+		mvprintw(0, 10, " _____                          _____");
+		mvprintw(1, 10, "|  __ \\                        |  _  |");
+		mvprintw(2, 10, "| |  \\/ __ _ _ __ ___   ___    | | | |");
+		mvprintw(3, 10, "| | __ / _` | '_ ` _ \\ / _ \\   | | | \\ \\ / / _ \\ '__|");
+		mvprintw(4, 10, "| |_\\ \\ (_| | | | | | |  __/   \\ \\_/ /\\ V /  __/ |");
+		mvprintw(5, 10, " \\____/\\__,_|_| |_| |_|\\___|    \\___/  \\_/ \\___|_|");
+
+		mvprintw(7, 13,    "NEW GAME");
+		mvprintw(8, 10, " ____________"); 
+		mvprintw(9, 10, "||   ENTER  ||");
+		mvprintw(10,10, "||__________||");
+		mvprintw(11,10, "|/__________\\|");
+		mvprintw(7, 55,  "QUIT");
+		mvprintw(8, 54, " ____ ");
+	        mvprintw(9, 54, "||Q ||");
+	        mvprintw(10, 54,"||__||");
+	        mvprintw(11,54, "|/__\\|");
+
+		ch = get_char();
+		switch (ch) {
+			case 'q':
+			case 'Q':
+				state = EXIT;
+				break;
+			case '\n':
+				state = INIT;
+				break;
+		}
+		break;
         }
         refresh();
         nanosleep(&timeret, NULL);
