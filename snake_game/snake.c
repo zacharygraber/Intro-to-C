@@ -5,8 +5,8 @@
  * Author: Rishabh Agrawal
  * Maintainer:
  * Created: Sun Sep 13 9:12:30 2020
- * Last-Updated: September 13 22:40 2020
- *           By: Rishabh Agrawal
+ * Last-Updated: October 5 2020
+ *           By: Zachary E Graber (zegraber@iu.edu)
  *
  */
 
@@ -18,6 +18,7 @@
 
 /* Change log:
  *
+ * + added function get_end which gets a pointer to the last tail of the snake
  *
  */
 
@@ -164,4 +165,12 @@ bool eat_itself(Snake* snake){
     tail = tail->next;
   }
   return false;
+}
+
+Snake* get_end(Snake* snake) {
+    Snake* temp = snake;
+    while (temp->next) {
+	temp = temp->next;
+    }
+    return temp;
 }
