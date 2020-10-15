@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #define PATIENTS 20
 int t=1, f=0;
 
@@ -23,11 +24,14 @@ void initializeBlank();
 void getAndWriteInput();
 void searchRecords(char lastName[15], char gender);
 void printRecord(Patient *pPtr);
+void removeDuplicateRecords();
+bool recordsMatch(Patient *p1Ptr, Patient *p2Ptr);
 
 int main(void) {
 
 	initializeBlank(); // Part a
 	getAndWriteInput(); // Part b
+	removeDuplicateRecords(); // Part d. It made more sense to me to do this before searching.
 	
 	// Part c
 	char lName[15], gender, input='s';
@@ -96,6 +100,48 @@ void getAndWriteInput() {
 		}
 		fclose(fPtr);
 	}
+}
+
+// Part d
+void removeDuplicateRecords() {
+	FILE* fPtr = fopen("nameage.dat", "rb");
+
+	// Get all the patients into an array
+	Patient recordArr[PATIENTS];
+	fread(recordArr, sizeof(Patient), PATIENTS, fPtr);
+
+	// Remove duplicates
+	// Yes, I know this is O(n^2) and horribly inefficient, but the data size isn't that big.
+	Patient blankP = {"unassigned", "", '\0', NULL};
+	int i, j;
+	for (i = 0; i < PATIENTS - 1; i++) {
+		if (!recordsMatch(recordArr + i, &blankP)) { // We don't care about empty records
+			for (j = i + 1; j < PATIENTS; j++) {
+				if (recordsMatch(recordArr + i, recordArr + j)) {
+					recordArr[j] = blankP;
+				}
+			}
+		}
+	}
+
+	// Write them back into the file.
+	fclose(fPtr);
+	fPtr = fopen("nameage.dat", "wb");
+	fwrite(recordArr, sizeof(Patient), PATIENTS, fPtr);
+	fclose(fPtr);
+}
+
+// Part d helper
+bool recordsMatch(Patient *p1Ptr, Patient *p2Ptr) {
+	if (strcmp(p1Ptr->lastName, p2Ptr->lastName))
+		return false;
+	if (strcmp(p1Ptr->firstName, p2Ptr->firstName))
+		return false;
+	if (p1Ptr->gender != p2Ptr->gender)
+		return false;
+	if (p1Ptr->isCovidPositive != p2Ptr->isCovidPositive)
+		return false;
+	return true;
 }
 
 // Part c
