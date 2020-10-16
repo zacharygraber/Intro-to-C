@@ -4,8 +4,6 @@
 #include <ncurses.h>
 
 int main(void){
-    printf("thuoeou");
     game();
-    printf("tuenao");
     return(0);
 }

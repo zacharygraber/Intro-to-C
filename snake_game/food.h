@@ -5,8 +5,8 @@
 * Author: Manisha Suresh Kumar
 * Maintainer:
 * Created: Sat Sep 12 13:21:55 2020
-* Last-Updated: September 12 16:01 2020
-*	  By: Manisha Suresh Kumar
+* Last-Updated: October 11 2020
+*	  By: Zachary E Graber (zegraber@iu.edu)
 *
 */
 
@@ -18,7 +18,8 @@
 
 /* Change log:
 *
-*
+*   + Added prototype for new function type_of_food()
+*   ~ Changed parameters for remove_eaten_food()
 */
 
 /*Copyright (c) 2016 The Trustees of Indiana University and
@@ -49,5 +50,6 @@ typedef struct Food Food;
 void add_new_food(Food* foods, Food* new_food);
 bool food_exists(Food* foods, int x, int y);
 Food* create_food(int x, int y, enum Type type);
-enum Type remove_eaten_food(Food* foods, int x, int y);
+enum Type type_of_food(Food* foods, int x, int y);
+enum Type remove_eaten_food(Food** foodsPtr, int x, int y);
 void draw_food(Food *food);
