@@ -1,0 +1,5 @@
+
+Numbers:                 2
+Alphanumeric Chars:      100
+Words with a vowel:      26
+Sentences:               3
