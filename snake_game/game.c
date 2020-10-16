@@ -25,6 +25,8 @@
 #define GREEN 1
 #define RED 2
 #define BLUE 3
+#define YELLOW 4
+#define CYAN 5
 
 void generate_points(int *food_x, int *food_y, int width, int height, int x_offset, int y_offset){
     *food_x = rand() % width + x_offset;
@@ -65,6 +67,8 @@ void game(){
     init_pair(1, COLOR_GREEN, COLOR_BLACK);
     init_pair(2, COLOR_RED, COLOR_BLACK);
     init_pair(3, COLOR_BLUE, COLOR_BLACK);
+    init_pair(4, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(5, COLOR_CYAN, COLOR_BLACK);
     nodelay(stdscr, TRUE); //Dont wait for char
     noecho(); // Don't echo input chars
     getmaxyx(stdscr, y_max, x_max);
@@ -144,9 +148,13 @@ void game(){
 	    mvprintw(7, 20, "                                    |___/ ");
 	    attroff(COLOR_PAIR(GREEN));
 
+	    attron(COLOR_PAIR(YELLOW));
 	    mvprintw(12, 38, "NORMAL");
+	    attroff(COLOR_PAIR(YELLOW));
 	    mvprintw(12, 20, "EASY");
+	    attron(COLOR_PAIR(RED));
 	    mvprintw(12, 57, "HARD");
+	    attroff(COLOR_PAIR(RED));
 	    
 	    int selectionBoxX;
 	    switch (difficulty) {
@@ -284,6 +292,7 @@ void game(){
 			    state = ALIVE;
 			    break;
 			case 2:
+			    state = TOP_10;
 			    break;
 			case 3:
 			    break;
@@ -291,6 +300,44 @@ void game(){
 		    break;
 	    }
 
+	    break;
+
+	case TOP_10:
+	    clear(); 
+	    x = window->upper_left_x + (window->width / 2);
+	    y = window->upper_left_y + (window->height / 2);
+	    draw_Gamewindow(window);
+
+	    attron(COLOR_PAIR(BLUE));
+	    mvprintw(y-12, x-14, " _____             __  _____ ");
+	    mvprintw(y-11, x-14, "|_   _|           /  ||  _  |");
+	    mvprintw(y-10, x-14, "  | | ___  _ __   `| || |/' |");
+	    mvprintw(y-9,  x-14, "  | |/ _ \\| '_ \\   | ||  /| |");
+	    mvprintw(y-8,  x-14, "  | | (_) | |_) | _| |\\ |_/ /");
+	    mvprintw(y-7,  x-14, "  \\_/\\___/| .__/  \\___/\\___/ ");
+	    mvprintw(y-6,  x-14, "          | |                ");
+	    mvprintw(y-5,  x-14, "          |_|                ");
+	    attroff(COLOR_PAIR(BLUE));
+
+	    static int top_scores[10];
+	    if (!checkedHighScores) {
+		top_10(top_scores);
+		checkedHighScores = true;
+	    }
+	    for (i = 0; i < 10; i++) {
+		mvprintw((y-3)+i, x-2, "%d", top_scores[i]);
+	    }
+
+	    mvprintw(y+8, x-3, "RETURN");
+	    mvprintw(y+9, x-7, " ____________"); 
+	    mvprintw(y+10, x-7, "||   ENTER  ||");
+	    mvprintw(y+11, x-7, "||__________||");
+ 	    mvprintw(y+12, x-7, "|/__________\\|");
+
+	    ch = get_char();
+	    if (ch == '\n') {
+		state = PAUSED;
+	    }
 	    break;
 
         case INIT:
@@ -522,7 +569,7 @@ void game(){
             mvprintw(20,20, "Key entered: %c", ch);
 	    mvprintw(0, 0, "Score:  %d", score);
             draw_Gamewindow(window);
-            draw_snake(snake);
+            draw_snake(snake, GREEN);
 	    draw_obstacles(obstacles);
             draw_food(foods);
             break;
@@ -592,7 +639,7 @@ void game(){
 				state = EXIT;
 				break;
 			case '\n':
-				state = INIT;
+				state = DIFFICULTY_SELECT;
 				break;
 		}
 		break;

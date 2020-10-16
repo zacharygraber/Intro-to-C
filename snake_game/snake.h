@@ -19,6 +19,7 @@
 /* Change log:
  *
  * + added prototype for function get_end
+ * ~ Updated parameters for draw_snake
  *
  */
 
@@ -47,7 +48,7 @@ typedef struct Snake Snake;
 Snake* init_snake(int x, int y);
 Snake* create_tail(int x, int y);
 Snake* move_snake(Snake* snake, int direction);
-void draw_snake(Snake* snake);
+void draw_snake(Snake* snake, int color);
 bool eat_itself(Snake* snake);
 Snake* remove_tail(Snake* snake);
 int len(Snake* snake);

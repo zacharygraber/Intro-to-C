@@ -19,6 +19,7 @@
 /* Change log:
  *
  * + added function get_end which gets a pointer to the last tail of the snake
+ * + added color when drawing the snake
  *
  */
 
@@ -147,11 +148,13 @@ int len(Snake* snake){
 /* } */
 
 // draws the snake on the board
-void draw_snake(Snake* snake){
+void draw_snake(Snake* snake, int color) {
+  attron(COLOR_PAIR(color));
   while(snake){
     mvprintw(snake->y, snake->x, "%c", snake->symbol);
     snake = snake->next;
   }
+  attroff(COLOR_PAIR(color));
 }
 
 // checks if it eats itself, if it does, then return true

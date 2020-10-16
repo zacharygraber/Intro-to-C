@@ -5,7 +5,7 @@
 * Author: Manisha Suresh Kumar
 * Maintainer:
 * Created: Sat Sep 12 13:16:12 2020
-* Last-Updated: October 11 2020
+* Last-Updated: October 16 2020
 *	  By: Zachary E Graber (zegraber@iu.edu)
 *
 */
@@ -19,6 +19,7 @@
 /* Change log:
 *  
 *  + added logic for remove_eaten_food function
+*  + added colors to food drawing
 *
 */
 
@@ -34,7 +35,8 @@
 #include <ncurses.h>
 #include <stdbool.h>
 #include "food.h"
-
+#define CYAN 5
+#define RED 2
 
 //Create new food
 Food* create_food(int x, int y, enum Type type){
@@ -114,10 +116,31 @@ enum Type remove_eaten_food(Food** foodsPtr, int x, int y){
 }
 
 // Display all the food
+// Good food is blue, bad food is yellow
 void draw_food (Food *foods)
 {   Food* temp = foods;
     while(temp) {
+	switch (temp->type) {
+	    case '+':
+	    case 'O':
+		attron(COLOR_PAIR(CYAN));
+		break;
+	    case 'X':
+	    case '-':
+		attron(COLOR_PAIR(RED));
+		break;
+	}
         mvprintw(temp->y, temp->x, "%c", temp->type);
+	switch (temp->type) {
+	    case '+':
+	    case 'O':
+		attroff(COLOR_PAIR(CYAN));
+		break;
+	    case 'X':
+	    case '-':
+		attroff(COLOR_PAIR(RED));
+		break;
+	}
         temp = temp->next;
     }
 }
