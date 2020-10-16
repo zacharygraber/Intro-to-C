@@ -22,6 +22,10 @@
 #include "game.h"
 #include "obstacle.h"
 
+#define GREEN 1
+#define RED 2
+#define BLUE 3
+
 void generate_points(int *food_x, int *food_y, int width, int height, int x_offset, int y_offset){
     *food_x = rand() % width + x_offset;
     *food_y = rand() % height + y_offset;
@@ -45,6 +49,7 @@ void game(){
     int boardIncreases = 0;
     int numSaves = num_saves();
     bool checkedHighScores;
+    int pause_menu_selection = 1;
 
     const int height = 30; 
     const int width = 70;
@@ -57,6 +62,9 @@ void game(){
     // Init all ncurses junk first, and only once.
     initscr();
     start_color();
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+    init_pair(2, COLOR_RED, COLOR_BLACK);
+    init_pair(3, COLOR_BLUE, COLOR_BLACK);
     nodelay(stdscr, TRUE); //Dont wait for char
     noecho(); // Don't echo input chars
     getmaxyx(stdscr, y_max, x_max);
@@ -70,12 +78,14 @@ void game(){
 	case MENU:
 	    clear();
 	    // ASCII art made at http://patorjk.com/software/taag/#p=display&f=Doom&t=SNAKE
+	    attron(COLOR_PAIR(GREEN));
             mvprintw(0, 25, " _____ _   _   ___   _   __ _____");
 	    mvprintw(1, 25, "/  ___| \\ | | / _ \\ | | / /|  ___|");
 	    mvprintw(2, 25, "\\ `--.|  \\| |/ /_\\ \\| |/ / | |__");
 	    mvprintw(3, 25, " `--. \\ . ` ||  _  ||    \\ |  __|");
 	    mvprintw(4, 25, "/\\__/ / |\\  || | | || |\\  \\| |___");
 	    mvprintw(5, 25, "\\____/\\_| \\_/\\_| |_/\\_| \\_/\\____/");
+	    attroff(COLOR_PAIR(GREEN));
 
 	    mvprintw(9, 5, " ____ ");
 	    mvprintw(10, 5, "||S ||");
@@ -123,6 +133,7 @@ void game(){
             break;
 	case DIFFICULTY_SELECT:
 	    clear();
+	    attron(COLOR_PAIR(GREEN));
 	    mvprintw(0, 20, "______ _  __  __ _            _ _");
 	    mvprintw(1, 20, "|  _  (_)/ _|/ _(_)          | | |");
 	    mvprintw(2, 20, "| | | |_| |_| |_ _  ___ _   _| | |_ _   _ ");
@@ -131,6 +142,7 @@ void game(){
 	    mvprintw(5, 20, "|___/ |_|_| |_| |_|\\___|\\__,_|_|\\__|\\__, |");
 	    mvprintw(6, 20, "                                     __/ |");
 	    mvprintw(7, 20, "                                    |___/ ");
+	    attroff(COLOR_PAIR(GREEN));
 
 	    mvprintw(12, 38, "NORMAL");
 	    mvprintw(12, 20, "EASY");
@@ -148,6 +160,8 @@ void game(){
 		    selectionBoxX = 54;
 		    break;
 	    }
+
+	    attron(COLOR_PAIR(BLUE));
 	    mvprintw(10, selectionBoxX, " --------");
 	    int i;
 	    for (i = 11; i < 14; i++) {
@@ -155,6 +169,7 @@ void game(){
 		mvprintw(i, selectionBoxX + 9, "|");
 	    }
 	    mvprintw(14, selectionBoxX, " --------");
+	    attroff(COLOR_PAIR(BLUE));
 	
 	    mvprintw(18, 21, "SELECT");
 	    mvprintw(20, 17, " ____    ____"); 
@@ -196,22 +211,84 @@ void game(){
 
 	    draw_Gamewindow(window);
 
-	    mvprintw(y-6, x-15, "______                        _ ");
-	    mvprintw(y-5, x-15, "| ___ \\                      | |");
-	    mvprintw(y-4, x-15, "| |_/ /_ _ _   _ ___  ___  __| |");
-	    mvprintw(y-3, x-15, "|  __/ _` | | | / __|/ _ \\/ _` |");
-	    mvprintw(y-2, x-15, "| | | (_| | |_| \\__ \\  __/ (_| |");
-	    mvprintw(y-1, x-15, "\\_|  \\__,_|\\__,_|___/\\___|\\__,_|");
+	    attron(COLOR_PAIR(GREEN));
+	    mvprintw(y-10, x-15, "______                        _ ");
+	    mvprintw(y-9, x-15, "| ___ \\                      | |");
+	    mvprintw(y-8, x-15, "| |_/ /_ _ _   _ ___  ___  __| |");
+	    mvprintw(y-7, x-15, "|  __/ _` | | | / __|/ _ \\/ _` |");
+	    mvprintw(y-6, x-15, "| | | (_| | |_| \\__ \\  __/ (_| |");
+	    mvprintw(y-5, x-15, "\\_|  \\__,_|\\__,_|___/\\___|\\__,_|");
+	    attroff(COLOR_PAIR(GREEN));
 
-	    mvprintw(y+2, x-3, " ____ "); 
-	    mvprintw(y+3, x-3, "||P ||");
-	    mvprintw(y+4, x-3, "||__||");
- 	    mvprintw(y+5, x-3, "|/__\\|");
-	    mvprintw(y+7, x-3, "UNPAUSE");
+	    mvprintw(y-1,x-24," --------    ----------    ----------    --------");
+	    mvprintw(y, x-24, "|  Quit  |  |  Resume  |  |  Top 10  |  |  Load  |");
+	    mvprintw(y+1,x-24," --------    ----------    ----------    --------");
+
+	    mvprintw(y+5, x-13, "SELECT");
+	    mvprintw(y+6, x-17, " ____    ____"); 
+	    mvprintw(y+7, x-17,  "||<-||  ||->||");
+	    mvprintw(y+8, x-17, "||__||  ||__||");
+ 	    mvprintw(y+9,x-17, "|/__\\|  |/__\\|");
+	    
+	    mvprintw(y+5, x+6, "CONFIRM");
+	    mvprintw(y+6, x+3, " ____________"); 
+	    mvprintw(y+7, x+3, "||   ENTER  ||");
+	    mvprintw(y+8, x+3, "||__________||");
+ 	    mvprintw(y+9, x+3, "|/__________\\|");
+
+	    attron(COLOR_PAIR(BLUE));
+	    switch (pause_menu_selection) {
+		case 0:
+		    mvprintw(y-1, x-24, " --------");
+		    mvprintw(y, x-24, "|  Quit  |");
+		    mvprintw(y+1, x-24, " --------");
+		    break;
+		case 1:
+		    mvprintw(y-1, x-12, " ----------");
+		    mvprintw(y, x-12, "|  Resume  |");
+		    mvprintw(y+1, x-12, " ----------");
+		    break;
+		case 2:
+		    mvprintw(y-1, x+2, " ----------");
+		    mvprintw(y, x+2, "|  Top 10  |");
+		    mvprintw(y+1, x+2, " ----------");
+		    break;
+		case 3:
+		    mvprintw(y-1, x+16, " --------");
+		    mvprintw(y, x+16, "|  Load  |");
+		    mvprintw(y+1, x+16, " --------");
+		    break;
+	    }
+	    attroff(COLOR_PAIR(BLUE));
 
 	    ch = get_char();
-	    if (ch == 'p' || ch == 'P') {
-		state = ALIVE;
+	    switch (ch) {
+		case 'p':
+		case 'P':
+		    state = ALIVE;
+		    break;
+		case LEFT:
+		    if (pause_menu_selection > 0)
+			pause_menu_selection -= 1;
+		    break;
+		case RIGHT:
+		    if (pause_menu_selection < 3)
+			pause_menu_selection += 1;
+		    break;
+		case '\n':
+		    switch (pause_menu_selection) {
+			case 0:
+			    state = EXIT;
+			    break;
+			case 1:
+			    state = ALIVE;
+			    break;
+			case 2:
+			    break;
+			case 3:
+			    break;
+		    }
+		    break;
 	    }
 
 	    break;
@@ -496,7 +573,7 @@ void game(){
 				top10_scores[newScoreIndex] = score; // Insert the score in the hole we just made
 
 				// Update the file
-				FILE *fPtr = fopen("./saves/saves_best_10.game", "wb");
+				FILE *fPtr = fopen("./saves/save_best_10.game", "wb");
 				fwrite(top10_scores, sizeof(int), 10, fPtr);
 				fclose(fPtr);
 			}
@@ -527,6 +604,8 @@ void game(){
     endwin();
 }
 
+// Returns the number of saves that exist
+// Useful if you want to know what to name the next save or if a save number is valid.
 int num_saves() {
 	int num_saves;
 	FILE *fPtr = fopen("./saves/num_saves.game", "rb"); // Will point to ./saves/num_saves.game
@@ -544,8 +623,9 @@ int num_saves() {
 	return num_saves;
 }
 
+// Loads the top 10 scores into the array pointed to by top10Ptr
 void top_10(int *top10Ptr) {
-	FILE *fPtr = fopen("./saves/saves_best_10.game", "rb");
+	FILE *fPtr = fopen("./saves/save_best_10.game", "rb");
 	int top10[10] = { 0 };
 	if (fPtr == NULL) { 
 		fPtr = fopen("./saves/save_best_10.game", "wb");
