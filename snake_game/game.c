@@ -4,7 +4,7 @@
  *   Contents: Contains all the main logic and main loop for the game
  *   Original Author Unknown.
  *   Most recent edit: 
- *   	Date: 10/11/2020
+ *   	Date: 10/16/2020
  *	Editor: Zachary E Graber (zegraber@iu.edu)
  *
  */
@@ -15,9 +15,9 @@
 #include <time.h>
 #include <string.h>
 #include <math.h>
+#include <unistd.h>
 #include "snake.h"
 #include "food.h"
-#include "game_window.h"
 #include "key.h"
 #include "game.h"
 #include "obstacle.h"
@@ -27,6 +27,7 @@
 #define BLUE 3
 #define YELLOW 4
 #define CYAN 5
+#define MAGENTA 6
 
 void generate_points(int *food_x, int *food_y, int width, int height, int x_offset, int y_offset){
     *food_x = rand() % width + x_offset;
@@ -38,10 +39,10 @@ void game(){
     enum Difficulty difficulty = NORMAL; // Difficulty of the game.
     static int x_max, y_max; //Max screen size variables
     static int x_offset, y_offset; // distance between the top left corner of your screen and the start of the board
-    gamewindow_t *window; // Name of the board
-    Snake *snake; // The snake
-    Food *foods,*new_food; // List of foods (Not an array)
-    Obstacle *obstacles, *new_obstacle; // List of obstacles.
+    gamewindow_t *window = NULL; // Name of the board
+    Snake *snake = NULL, *enemy_snake = NULL; // The snake and the AI one
+    Food *foods = NULL, *new_food; // List of foods (Not an array)
+    Obstacle *obstacles = NULL, *new_obstacle; // List of obstacles.
     int snakeDir; // The current direction the snake is moving.
     Snake *endOfTail; // The end of the snake's tail
     int endX; // X location of end of tail
@@ -52,6 +53,8 @@ void game(){
     int numSaves = num_saves();
     bool checkedHighScores;
     int pause_menu_selection = 1;
+    int lives_remaining;
+    int extra_sleep_flag = 0;
 
     const int height = 30; 
     const int width = 70;
@@ -69,6 +72,7 @@ void game(){
     init_pair(3, COLOR_BLUE, COLOR_BLACK);
     init_pair(4, COLOR_YELLOW, COLOR_BLACK);
     init_pair(5, COLOR_CYAN, COLOR_BLACK);
+    init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
     nodelay(stdscr, TRUE); //Dont wait for char
     noecho(); // Don't echo input chars
     getmaxyx(stdscr, y_max, x_max);
@@ -78,6 +82,12 @@ void game(){
 
 
     while(state != EXIT){
+
+	if (extra_sleep_flag > 0) {
+		sleep(extra_sleep_flag);
+		extra_sleep_flag = 0;
+	}
+
         switch(state){
 	case MENU:
 	    clear();
@@ -344,6 +354,7 @@ void game(){
 	    score = 0;
 	    scoreThisLevel = 0;
 	    checkedHighScores = false;
+	    lives_remaining = 3;
 
 	    // Setting height and width of the board
             x_offset = (x_max / 2) - (width / 2);
@@ -354,7 +365,8 @@ void game(){
             draw_Gamewindow(window);
 
             // Init snake
-            snake = init_snake(x_offset + (width / 2), y_offset + (height / 2));
+            snake = init_snake(x_offset + (width / 2), y_offset + (height / 2) - 2);
+	    enemy_snake = init_snake(x_offset + (width / 2), y_offset + (height / 2) + 2);
             
             // Init foods & obstacles
             int food_x, food_y, num_foods, num_obstacles, size;
@@ -406,6 +418,7 @@ void game(){
             }
 	    snakeDir = NOCHAR;
             state = ALIVE;
+	    extra_sleep_flag = display_lives(window, lives_remaining);
             break;
 
         case ALIVE:
@@ -576,77 +589,108 @@ void game(){
 
         case DEAD:
 		clear();
-		mvprintw(0, 10, " _____                          _____");
-		mvprintw(1, 10, "|  __ \\                        |  _  |");
-		mvprintw(2, 10, "| |  \\/ __ _ _ __ ___   ___    | | | |");
-		mvprintw(3, 10, "| | __ / _` | '_ ` _ \\ / _ \\   | | | \\ \\ / / _ \\ '__|");
-		mvprintw(4, 10, "| |_\\ \\ (_| | | | | | |  __/   \\ \\_/ /\\ V /  __/ |");
-		mvprintw(5, 10, " \\____/\\__,_|_| |_| |_|\\___|    \\___/  \\_/ \\___|_|");
+		if (lives_remaining > 1) {
+			lives_remaining -= 1;
+			extra_sleep_flag = display_lives(window, lives_remaining);
+			// Reset the snake and whatnot
+			free_snake(snake);
+			snake = init_snake(x_offset + (width / 2), y_offset + (height / 2));
+			//free_snake(enemy_snake);
+			// TODO: reset enemy snake
+			state = ALIVE;
+		}
+		else {
+			attron(COLOR_PAIR(RED));
+			mvprintw(0, 10, " _____                          _____");
+			mvprintw(1, 10, "|  __ \\                        |  _  |");
+			mvprintw(2, 10, "| |  \\/ __ _ _ __ ___   ___    | | | |");
+			mvprintw(3, 10, "| | __ / _` | '_ ` _ \\ / _ \\   | | | \\ \\ / / _ \\ '__|");
+			mvprintw(4, 10, "| |_\\ \\ (_| | | | | | |  __/   \\ \\_/ /\\ V /  __/ |");
+			mvprintw(5, 10, " \\____/\\__,_|_| |_| |_|\\___|    \\___/  \\_/ \\___|_|");
+			attroff(COLOR_PAIR(RED));
 
-		mvprintw(7, 13,    "NEW GAME");
-		mvprintw(8, 10, " ____________"); 
-		mvprintw(9, 10, "||   ENTER  ||");
-		mvprintw(10,10, "||__________||");
-		mvprintw(11,10, "|/__________\\|");
-		mvprintw(7, 55,  "QUIT");
-		mvprintw(8, 54, " ____ ");
-	        mvprintw(9, 54, "||Q ||");
-	        mvprintw(10, 54,"||__||");
-	        mvprintw(11,54, "|/__\\|");
+			mvprintw(7, 13,    "NEW GAME");
+			mvprintw(8, 10, " ____________"); 
+			mvprintw(9, 10, "||   ENTER  ||");
+			mvprintw(10,10, "||__________||");
+			mvprintw(11,10, "|/__________\\|");
+			mvprintw(7, 55,  "QUIT");
+			mvprintw(8, 54, " ____ ");
+			mvprintw(9, 54, "||Q ||");
+			mvprintw(10, 54,"||__||");
+			mvprintw(11,54, "|/__\\|");
 
-		mvprintw(15, 0, "Your Score:  %d", score);
+			mvprintw(15, 0, "Your Score:  %d", score);
 
-		mvprintw(17, 0, "TOP 10");
-		mvprintw(18, 0, "------");
-		static int top10_scores[10];
+			mvprintw(17, 0, "TOP 10");
+			mvprintw(18, 0, "------");
+			static int top10_scores[10];
 
-		// We only want this to run once, not every loop.
-		if (!checkedHighScores) {
-			top_10(top10_scores);
+			// We only want this to run once, not every loop.
+			if (!checkedHighScores) {
+				top_10(top10_scores);
 
-			// Search through the array to see if this is a new high score.
-			int newScoreIndex = -1;
+				// Search through the array to see if this is a new high score.
+				int newScoreIndex = -1;
+				for (i = 0; i < 10; i++) {
+					if (score > top10_scores[i]) {
+						newScoreIndex = i;
+						break;
+					}
+				}
+				if (newScoreIndex != -1) { // A value that's not -1 signifies that we need to shift things around
+					// Move the 9th element to place 10, 8th to place 9, etc, shifting down from newScoreIndex.
+					for (i = 8; i >= newScoreIndex; i--) {
+						top10_scores[i+1] = top10_scores[i];
+					}
+					top10_scores[newScoreIndex] = score; // Insert the score in the hole we just made
+
+					// Update the file
+					FILE *fPtr = fopen("./saves/save_best_10.game", "wb");
+					fwrite(top10_scores, sizeof(int), 10, fPtr);
+					fclose(fPtr);
+				}
+				checkedHighScores = true;
+			}
+
+			// Print out the top 10 scores
 			for (i = 0; i < 10; i++) {
-				if (score > top10_scores[i]) {
-					newScoreIndex = i;
+				mvprintw(19 + i, 0, "%d", top10_scores[i]);
+			}
+
+			ch = get_char();
+			switch (ch) {
+				case 'q':
+				case 'Q':
+					state = EXIT;
 					break;
-				}
+				case '\n':
+					free_snake(snake);
+					//TODO: free enemy snake
+					free(window);
+					free_food(foods);
+					free_obstacles(obstacles);
+					state = DIFFICULTY_SELECT;
+					break;
 			}
-			if (newScoreIndex != -1) { // A value that's not -1 signifies that we need to shift things around
-				// Move the 9th element to place 10, 8th to place 9, etc, shifting down from newScoreIndex.
-				for (i = 8; i >= newScoreIndex; i--) {
-					top10_scores[i+1] = top10_scores[i];
-				}
-				top10_scores[newScoreIndex] = score; // Insert the score in the hole we just made
-
-				// Update the file
-				FILE *fPtr = fopen("./saves/save_best_10.game", "wb");
-				fwrite(top10_scores, sizeof(int), 10, fPtr);
-				fclose(fPtr);
-			}
-			checkedHighScores = true;
-		}
-
-		// Print out the top 10 scores
-		for (i = 0; i < 10; i++) {
-			mvprintw(19 + i, 0, "%d", top10_scores[i]);
-		}
-
-		ch = get_char();
-		switch (ch) {
-			case 'q':
-			case 'Q':
-				state = EXIT;
-				break;
-			case '\n':
-				state = DIFFICULTY_SELECT;
-				break;
 		}
 		break;
         }
         refresh();
         nanosleep(&timeret, NULL);
     }
+
+    // Properly free all malloced resources before exiting
+    if (snake)
+	free_snake(snake);
+    if (enemy_snake)
+	free_snake(enemy_snake);
+    if (window)
+	free(window);
+    if (foods)
+	free_food(foods);
+    if (obstacles)
+	free_obstacles(obstacles);
     clear();
     endwin();
 }
@@ -687,4 +731,23 @@ void top_10(int *top10Ptr) {
 	for (i = 0; i < 10; i++) {
 		top10Ptr[i] = top10[i];
 	}
+}
+
+int display_lives(gamewindow_t *window, int lives_remaining) {
+	clear();
+	int x = window->upper_left_x + (window->width / 2);
+	int y = window->upper_left_y + (window->height / 2);
+	draw_Gamewindow(window);
+
+	attron(COLOR_PAIR(RED));
+	int i;
+	for (i = 0; i < lives_remaining; i++) {
+		mvprintw(y-2, (x-20) + (15 * i), ",d88b.d88b,");
+		mvprintw(y-1, (x-20) + (15 * i), "88888888888");
+		mvprintw(y ,  (x-20) + (15 * i), "`Y8888888Y'");
+		mvprintw(y+1, (x-20) + (15 * i), "  `Y888Y'");
+		mvprintw(y+2, (x-20) + (15 * i), "    `Y'");
+	}
+	attroff(COLOR_PAIR(RED));
+	return 2;
 }

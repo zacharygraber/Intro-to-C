@@ -20,6 +20,7 @@
  *
  * + added function get_end which gets a pointer to the last tail of the snake
  * + added color when drawing the snake
+ * + added function free_snake that frees all the nodes of a snake properly
  *
  */
 
@@ -176,4 +177,14 @@ Snake* get_end(Snake* snake) {
 	temp = temp->next;
     }
     return temp;
+}
+
+void free_snake(Snake* snake) {
+    Snake* temp = snake;
+    Snake* tempNext;
+    while (temp) {
+        tempNext = temp->next;
+        free(temp);
+        temp = tempNext;
+    }
 }

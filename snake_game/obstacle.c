@@ -5,7 +5,7 @@
 * Author: Zachary E Graber
 * Maintainer:
 * Created: October 11 2020
-* Last-Updated: October 11 2020
+* Last-Updated: October 16 2020
 *	  By: Zachary E Graber (zegraber@iu.edu)
 *
 */
@@ -19,6 +19,7 @@
 /* Change log:
 *  
 *  + created
+*  + added method free_obstacles that properly frees all obstacles in a given list
 *
 */
 
@@ -76,5 +77,15 @@ void draw_obstacles(Obstacle *obstacles){
 	    }
 	}
         temp = temp->next;
+    }
+}
+
+void free_obstacles(Obstacle *obsts) {
+    Obstacle *temp = obsts;
+    Obstacle *tempNext;
+    while (temp) {
+	tempNext = temp->next;
+	free(temp);
+	temp = tempNext;
     }
 }

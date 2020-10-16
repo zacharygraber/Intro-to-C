@@ -5,7 +5,7 @@
 * Author: Zachary E Graber
 * Maintainer:
 * Created: October 11 2020
-* Last-Updated: October 11 2020
+* Last-Updated: October 16 2020
 *	  By: Zachary E Graber (zegraber@iu.edu)
 *
 */
@@ -13,6 +13,7 @@
 /* Change log:
 *
 *   + created
+*   + added method free_obstacles(Obstacle *obsts)
 *
 */
 
@@ -33,3 +34,4 @@ void add_new_obstacle(Obstacle* obstacles, Obstacle* new_obstacle);
 bool obstacle_exists(Obstacle* obstacles, int x, int y);
 Obstacle* create_obstacle(int x, int y, int size);
 void draw_obstacles(Obstacle *obstacles);
+void free_obstacles(Obstacle *obsts);

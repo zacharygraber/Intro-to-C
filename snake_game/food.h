@@ -5,7 +5,7 @@
 * Author: Manisha Suresh Kumar
 * Maintainer:
 * Created: Sat Sep 12 13:21:55 2020
-* Last-Updated: October 11 2020
+* Last-Updated: October 16 2020
 *	  By: Zachary E Graber (zegraber@iu.edu)
 *
 */
@@ -20,6 +20,7 @@
 *
 *   + Added prototype for new function type_of_food()
 *   ~ Changed parameters for remove_eaten_food()
+*   + added prototpye for new function free_food
 */
 
 /*Copyright (c) 2016 The Trustees of Indiana University and
@@ -53,3 +54,4 @@ Food* create_food(int x, int y, enum Type type);
 enum Type type_of_food(Food* foods, int x, int y);
 enum Type remove_eaten_food(Food** foodsPtr, int x, int y);
 void draw_food(Food *food);
+void free_food(Food *food);

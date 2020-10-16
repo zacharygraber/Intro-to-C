@@ -20,6 +20,7 @@
 *  
 *  + added logic for remove_eaten_food function
 *  + added colors to food drawing
+*  + added function free_food which frees all food properly
 *
 */
 
@@ -142,5 +143,15 @@ void draw_food (Food *foods)
 		break;
 	}
         temp = temp->next;
+    }
+}
+
+void free_food(Food *foods) {
+    Food *temp = foods;
+    Food *tempNext;
+    while (temp) {
+	tempNext = temp->next;
+	free(temp);
+	temp = tempNext;
     }
 }
