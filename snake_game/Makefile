@@ -4,12 +4,12 @@ CFLAGS= -I$(IDIR) -g -O0
 
 ODIR=.
 
-LIBS=-lncurses
+LIBS=-lncurses -lm
 
 _DEPS = 
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = snake_game.o food.o game.o game_window.o snake.o key.o
+_OBJ = snake_game.o food.o obstacle.o game.o game_window.o snake.o key.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.c $(DEPS)
