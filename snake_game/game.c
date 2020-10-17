@@ -41,11 +41,11 @@ void game(){
     static int x_offset, y_offset; // distance between the top left corner of your screen and the start of the board
     gamewindow_t *window = NULL; // Name of the board
     Snake *snake = NULL, *enemy_snake = NULL; // The snake and the AI one
+    Snake *tail, *enemy_tail;
     Food *foods = NULL, *new_food; // List of foods (Not an array)
     Obstacle *obstacles = NULL, *new_obstacle; // List of obstacles.
     int snakeDir; // The current direction the snake is moving.
     int enemySnakeDir = RIGHT; // Direction the enemy snake
-    Snake *endOfTail; // The end of the snake's tail
     int endX; // X location of end of tail
     int endY; // Y location of end of tail
     int score;
@@ -425,10 +425,12 @@ void game(){
             break;
 
         case ALIVE:
-	    endOfTail = get_end(snake);
-	    endX = endOfTail->x;
-	    endY = endOfTail->y;
-
+	    // Get the end of the tail now BEFORE we move
+	    tail = get_end(snake);
+	    int tail_x = tail->x, tail_y = tail->y;
+	    enemy_tail = get_end(enemy_snake);
+	    int enemy_tail_x = enemy_tail->x, enemy_tail_y = enemy_tail->y;
+		
             ch = get_char();
 	    switch (ch) {
 		// Movement cases. Prevent oppositional direction changes. 
@@ -575,7 +577,7 @@ void game(){
 			    timeret.tv_nsec /= 1.5;
 			    scoreThisLevel -= 100;
 			}
-			(get_end(snake))->next = create_tail(endX, endY); // Add another tail on the end
+			(get_end(snake))->next = create_tail(tail_x, tail_y); // Add another tail on the end
 			break;
 		    case Decrease:
 			if (len(snake) > 1) {
@@ -597,6 +599,29 @@ void game(){
                 new_food = create_food(food_x, food_y, type);
                 add_new_food(foods, new_food);
 	    }
+	    // Check to see if the enemy snake's head is now in a food
+	    if (food_exists(foods, enemy_snake->x, enemy_snake->y)) {
+		switch (remove_eaten_food(&foods, enemy_snake->x, enemy_snake->y)) {
+		    case Increase:
+			if (len(enemy_snake) < window->width)
+			    (get_end(enemy_snake))->next = create_tail(enemy_tail_x, enemy_tail_y); // Add another tail on the end
+			break;
+		    case Decrease:
+			if (len(enemy_snake) > 1) {
+			    enemy_snake = remove_tail(enemy_snake);
+			}
+			break;
+		}
+		// spawn another food
+		int food_x, food_y;
+		generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
+                while (food_exists(foods,food_x, food_y))
+                    generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
+                type = (rand() > RAND_MAX/2) ? Increase : Decrease;
+                new_food = create_food(food_x, food_y, type);
+                add_new_food(foods, new_food);
+	    }
+
 		
 	    // Check for collisions with walls
 	    if (snake->x <= window->upper_left_x || snake->y <= window->upper_left_y || snake->x >= window->upper_left_x + window->width || snake->y >= window->upper_left_y + window->height) {
