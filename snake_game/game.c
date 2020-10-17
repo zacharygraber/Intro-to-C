@@ -44,6 +44,7 @@ void game(){
     Food *foods = NULL, *new_food; // List of foods (Not an array)
     Obstacle *obstacles = NULL, *new_obstacle; // List of obstacles.
     int snakeDir; // The current direction the snake is moving.
+    int enemySnakeDir = RIGHT; // Direction the enemy snake
     Snake *endOfTail; // The end of the snake's tail
     int endX; // X location of end of tail
     int endY; // Y location of end of tail
@@ -158,6 +159,7 @@ void game(){
 	    mvprintw(7, 20, "                                    |___/ ");
 	    attroff(COLOR_PAIR(GREEN));
 
+
 	    attron(COLOR_PAIR(YELLOW));
 	    mvprintw(12, 38, "NORMAL");
 	    attroff(COLOR_PAIR(YELLOW));
@@ -207,7 +209,8 @@ void game(){
 		    if (difficulty == HARD)
 			difficulty = NORMAL;
 		    else if (difficulty == NORMAL)
-			difficulty = EASY;
+	
+		difficulty = EASY;
 		    break;
 		case RIGHT:
 		    if (difficulty == EASY)
@@ -526,9 +529,40 @@ void game(){
 			break;
 	    }
 
-	    // Move the snake (if the player has entered a direction yet
+	    // Move both snakes (if the player has entered a direction yet
 	    if (snakeDir != NOCHAR) {
 		snake = move_snake(snake, snakeDir);
+	    }
+	    // The AI snake will stay away from the edges, tending towards the center
+	    if (snakeDir != NOCHAR) {
+		int centerx = window->upper_left_x + (window->width / 2);
+	    	int centery = window->upper_left_y + (window->height / 2);
+		int maxDistanceFromCenterX = ((window->width / 2) - 1);
+		int maxDistanceFromCenterY = ((window->height / 2) - 1);
+		int distanceFromCenterX = abs(centerx - enemy_snake->x);
+		int distanceFromCenterY = abs(centery - enemy_snake->y);
+
+		int probability; // Calculate a number between 0 and 100 based on how far away from the center the snake is
+		if (enemySnakeDir ==  UP || enemySnakeDir == DOWN) {
+			probability = (int)(((float) distanceFromCenterY / (float) maxDistanceFromCenterY) * 100);
+		}
+		else {
+			probability = (int)(((float) distanceFromCenterX / (float) maxDistanceFromCenterX) * 100);
+
+		}
+		// Check a random number against  the probability
+		if ((rand() % 100) < probability) {
+			if (enemySnakeDir == UP || enemySnakeDir == DOWN) {
+				probability = 50 - (int)(((float)(centerx - enemy_snake->x) / (float)(maxDistanceFromCenterX)) * 50); 
+				// Probability of making a left turn instead of right. Approaches 100 as snake gets closer to the right side
+				enemySnakeDir = rand() % 100 < probability ? LEFT : RIGHT;
+			}
+			else {
+				probability = 50 - (int)(((float)(centery - enemy_snake->y) / (float)(maxDistanceFromCenterY)) * 50); 
+				enemySnakeDir = rand() % 100 < probability ? UP : DOWN;
+			}
+		}
+		enemy_snake = move_snake(enemy_snake, enemySnakeDir);
 	    }
 
 	    // Check to see if the snake's head is now in a food
@@ -576,6 +610,9 @@ void game(){
 	    if (len(snake) > 1 && eat_itself(snake)) {
 		state = DEAD;
 	    }
+	    if (touching_snake(snake, enemy_snake)) {
+		state = DEAD;
+	    }
 
 	    // Draw everything on the screen
             clear();
@@ -583,6 +620,7 @@ void game(){
 	    mvprintw(0, 0, "Score:  %d", score);
             draw_Gamewindow(window);
             draw_snake(snake, GREEN);
+	    draw_snake(enemy_snake, MAGENTA);
 	    draw_obstacles(obstacles);
             draw_food(foods);
             break;
@@ -592,11 +630,14 @@ void game(){
 		if (lives_remaining > 1) {
 			lives_remaining -= 1;
 			extra_sleep_flag = display_lives(window, lives_remaining);
-			// Reset the snake and whatnot
+
+			// Reset the snakes
 			free_snake(snake);
 			snake = init_snake(x_offset + (width / 2), y_offset + (height / 2));
-			//free_snake(enemy_snake);
-			// TODO: reset enemy snake
+			snakeDir = NOCHAR;
+			enemySnakeDir = RIGHT;
+			free_snake(enemy_snake);
+			enemy_snake = init_snake(x_offset + (width / 2), y_offset + (height / 2) + 2);
 			state = ALIVE;
 		}
 		else {
@@ -666,7 +707,7 @@ void game(){
 					break;
 				case '\n':
 					free_snake(snake);
-					//TODO: free enemy snake
+					free_snake(enemy_snake);
 					free(window);
 					free_food(foods);
 					free_obstacles(obstacles);

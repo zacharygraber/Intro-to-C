@@ -21,6 +21,7 @@
  * + added prototype for function get_end
  * ~ Updated parameters for draw_snake
  * + added prototype for function free_snake
+ * + added prototpye for function touching_snake
  *
  */
 
@@ -55,3 +56,4 @@ Snake* remove_tail(Snake* snake);
 int len(Snake* snake);
 Snake* get_end(Snake* snake);
 void free_snake(Snake* snake);
+bool touching_snake(Snake* snake, Snake* other_snake);

@@ -188,3 +188,20 @@ void free_snake(Snake* snake) {
         temp = tempNext;
     }
 }
+
+// returns true if Snake is touching any part of other_snake, otherwise false
+bool touching_snake(Snake* snake, Snake* other_snake) {
+	Snake *temp = snake;
+	Snake *temp_other;
+	while (temp) {
+		temp_other = other_snake;
+		while (temp_other) {
+			if (temp->x == temp_other->x && temp->y == temp_other->y) {
+				return true;
+			}
+			temp_other = temp_other->next;
+		}
+		temp = temp->next;
+	}
+	return false;
+}
