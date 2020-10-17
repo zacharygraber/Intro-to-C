@@ -1,0 +1,11 @@
+score: 160
+lives_remaining: 2
+scoreThisLevel: 60
+boardIncreases: 0
+timeret.tv_nsec: 41666666
+snakeDir: 0
+enemySnakeDir: 2
+snake: {x: 89, y: 48 ;x: 88, y: 48 ;x: 87, y: 48 }
+enemy_snake: {x: 89, y: 50 ;x: 88, y: 50 ;x: 87, y: 50 }
+foods: {x: 64, y: 39, type: X ;x: 85, y: 41, type: X ;x: 56, y: 53, type: X ;x: 83, y: 36, type: X ;x: 119, y: 33, type: + ;x: 86, y: 53, type: - ;x: 120, y: 38, type: X ;x: 57, y: 50, type: + ;x: 56, y: 48, type: + ;x: 58, y: 47, type: O ;x: 61, y: 51, type: - ;x: 72, y: 57, type: - ;x: 118, y: 52, type: + ;x: 85, y: 35, type: O ;x: 89, y: 62, type: + ;x: 58, y: 37, type: X ;x: 115, y: 62, type: + ;x: 111, y: 39, type: + ;x: 95, y: 54, type: - ;x: 72, y: 54, type: O }
+obstacles: {x: 64, y: 44, size: 4 ;x: 77, y: 34, size: 4 ;x: 116, y: 39, size: 3 ;x: 76, y: 52, size: 2 }

@@ -308,6 +308,12 @@ void game(){
 			    state = TOP_10;
 			    break;
 			case 3:
+			    free_snake(snake);
+			    free_snake(enemy_snake);
+			    free(window);
+			    free_food(foods);
+			    free_obstacles(obstacles);
+			    state = LOAD;
 			    break;
 		    }
 		    break;
@@ -430,6 +436,7 @@ void game(){
 	    int tail_x = tail->x, tail_y = tail->y;
 	    enemy_tail = get_end(enemy_snake);
 	    int enemy_tail_x = enemy_tail->x, enemy_tail_y = enemy_tail->y;
+	    bool freeall = false;
 		
             ch = get_char();
 	    switch (ch) {
@@ -480,29 +487,46 @@ void game(){
 		// Pausing
 		case 'p':
 		case 'P':
+		    checkedHighScores = false;
 		    state = PAUSED;
 		    break;
+	
+		// Loading 
+		case 'l':
+		case 'L':
+			freeall = true;
+			state = LOAD;
+			break;
+
 
 		// Saving
 		case 'f':
 		case 'F':;
+			clear();
 			// Create and open a new file "./saves/save_n.game", where n is the number of the save
 			char fName[numSaves > 0 ? 19 + (int)(floor(log10(numSaves))) : 20];
 			sprintf(fName, "./saves/save_%d.game", numSaves + 1);
+
+			attron(COLOR_PAIR(GREEN));
+			mvprintw(window->upper_left_y + (window->height / 2), window->upper_left_x + (window->width / 2) - 5, "SAVED AS #%d", numSaves + 1);
+			attroff(COLOR_PAIR(GREEN));
+			refresh();
 			
 			// Update the number of saves
 			numSaves += 1;
 			FILE *fPtr = fopen("./saves/num_saves.game", "wb");
 			fwrite(&numSaves, sizeof(int), 1, fPtr);
 			fclose(fPtr);
-
+	
 			// Write the save file
 			fPtr = fopen(fName, "w");
 			fprintf(fPtr, "score: %d\n", score);
+			fprintf(fPtr, "lives_remaining: %d\n", lives_remaining);
 			fprintf(fPtr, "scoreThisLevel: %d\n", scoreThisLevel);
 			fprintf(fPtr, "boardIncreases: %d\n", boardIncreases);
 			fprintf(fPtr, "timeret.tv_nsec: %Ld\n", timeret.tv_nsec);
 			fprintf(fPtr, "snakeDir: %d\n", snakeDir);
+			fprintf(fPtr, "enemySnakeDir: %d\n", enemySnakeDir);
 
 			fprintf(fPtr, "snake: {");
 			Snake *tempSnake = snake;
@@ -511,6 +535,15 @@ void game(){
 				tempSnake = tempSnake->next;
 			}
 			fprintf(fPtr, "\n");
+
+			fprintf(fPtr, "enemy_snake: {");
+			tempSnake = enemy_snake;
+			while (tempSnake) {
+				fprintf(fPtr, "x: %d, y: %d %c", tempSnake->x, tempSnake->y, tempSnake->next ? ';' : '}');
+				tempSnake = tempSnake->next;
+			}
+			fprintf(fPtr, "\n");
+
 
 			fprintf(fPtr, "foods: {");
 			Food *tempFoods = foods;
@@ -526,8 +559,8 @@ void game(){
 				fprintf(fPtr, "x: %d, y: %d, size: %d %c", tempObst->x, tempObst->y, tempObst->size, tempObst->next ? ';' : '}');
 				tempObst = tempObst->next;
 			}
-
 			fclose(fPtr);
+			sleep(2);
 			break;
 	    }
 
@@ -625,17 +658,21 @@ void game(){
 		
 	    // Check for collisions with walls
 	    if (snake->x <= window->upper_left_x || snake->y <= window->upper_left_y || snake->x >= window->upper_left_x + window->width || snake->y >= window->upper_left_y + window->height) {
+		checkedHighScores = false;
 		state = DEAD;
 	    }
 	    // Check for collisions with obstacles
 	    if (obstacle_exists(obstacles, snake->x, snake->y)) {
+		checkedHighScores = false;
 		state = DEAD;
 	    }
 	    // Check for collisions with the snake itself
 	    if (len(snake) > 1 && eat_itself(snake)) {
+		checkedHighScores = false;
 		state = DEAD;
 	    }
 	    if (touching_snake(snake, enemy_snake)) {
+		checkedHighScores = false;
 		state = DEAD;
 	    }
 
@@ -648,6 +685,13 @@ void game(){
 	    draw_snake(enemy_snake, MAGENTA);
 	    draw_obstacles(obstacles);
             draw_food(foods);
+	    if (freeall) {
+		free_snake(snake);
+		free_snake(enemy_snake);
+		free(window);
+		free_food(foods);
+		free_obstacles(obstacles);
+	    }
             break;
 
         case DEAD:
@@ -740,6 +784,93 @@ void game(){
 					break;
 			}
 		}
+		break;
+	case LOAD:
+		nodelay(stdscr, FALSE);
+		echo();
+		clear();
+		attron(COLOR_PAIR(BLUE));
+		mvprintw(0, 0, " _                     _ ");
+		mvprintw(1, 0, "| |                   | |");
+		mvprintw(2, 0, "| |     ___   __ _  __| |");
+		mvprintw(3, 0, "| |    / _ \\ / _` |/ _` |");
+		mvprintw(4, 0, "| |___| (_) | (_| | (_| |");
+		mvprintw(5, 0, "\\_____/\\___/ \\__,_|\\__,_|");
+		attroff(COLOR_PAIR(BLUE));
+
+		int save_num;
+		mvprintw(8, 0, "File #: ");
+		mvscanw(8, 8, "%d", &save_num);
+		
+		char fName2[save_num > 0 ? 19 + (int)(floor(log10(save_num))) : 20];
+		sprintf(fName2, "./saves/save_%d.game", save_num);
+		mvprintw(9, 0, "LOADING FROM '%s'", fName2);
+
+		FILE *save = fopen(fName2, "r");
+		if (save != NULL) {
+			fscanf(save, "score: %d\n", &score);
+			fscanf(save, "lives_remaining: %d\n", &lives_remaining);
+			fscanf(save, "scoreThisLevel: %d\n", &scoreThisLevel);
+			fscanf(save, "boardIncreases: %d\n", &boardIncreases);
+			fscanf(save, "timeret.tv_nsec: %Ld\n", &(timeret.tv_nsec));
+			fscanf(save, "snakeDir: %d\n", &snakeDir);
+			fscanf(save, "enemySnakeDir: %d\n", &enemySnakeDir);
+
+			int snakeX, snakeY;
+			char endIndicator;
+			fscanf(save, "snake: {x: %d, y: %d %c", &snakeX, &snakeY, &endIndicator);
+			snake = create_tail(snakeX, snakeY);
+			Snake *temp = snake;
+			while (endIndicator == ';') {
+				fscanf(save, "x: %d, y: %d %c", &snakeX, &snakeY, &endIndicator);
+				temp->next = create_tail(snakeX, snakeY);
+				temp = temp->next;
+			}
+			fscanf(save, "\n");
+
+			fscanf(save, "enemy_snake: {x: %d, y: %d %c", &snakeX, &snakeY, &endIndicator);
+			enemy_snake = create_tail(snakeX, snakeY);
+			temp = enemy_snake;
+			while (endIndicator == ';') {
+				fscanf(save, "x: %d, y: %d %c", &snakeX, &snakeY, &endIndicator);
+				temp->next = create_tail(snakeX, snakeY);
+				temp = temp->next;
+			}
+			fscanf(save, "\n");
+
+			char foodType;
+			fscanf(save, "foods: {x: %d, y: %d, type: %c %c", &snakeX, &snakeY, &foodType, &endIndicator);
+			foods = create_food(snakeX, snakeY, foodType == '+' || foodType == 'O' ? Increase : Decrease);
+			Food *foodTemp = foods;
+			while (endIndicator == ';') {
+				fscanf(save, "x: %d, y: %d, type: %c %c", &snakeX, &snakeY, &foodType, &endIndicator);
+				foodTemp->next = create_food(snakeX, snakeY, foodType == '+' || foodType == 'O' ? Increase : Decrease);
+				foodTemp = foodTemp->next;
+			}
+			fscanf(save, "\n");
+			
+			int obstSize;
+			fscanf(save, "obstacles: {x: %d, y: %d, size: %d %c", &snakeX, &snakeY, &obstSize, &endIndicator);
+			obstacles = create_obstacle(snakeX, snakeY, obstSize);
+			Obstacle *obstTemp = obstacles;
+			while (endIndicator == ';') {
+				fscanf(save, "x: %d, y: %d, size: %d %c", &snakeX, &snakeY, &obstSize, &endIndicator);
+				obstTemp->next = create_obstacle(snakeX, snakeY, obstSize);
+				obstTemp = obstTemp->next;
+			}
+
+			fclose(save);
+
+			checkedHighScores = false;
+			x_offset = (x_max / 2) - (width / 2);
+			y_offset = (y_max / 2) - (height / 2);
+			window = init_GameWindow(x_offset, y_offset, width, height);
+			//window = changeGameWindow((window->upper_left_x - 5) * boardIncreases, (window->upper_left_y - 5) * boardIncreases, (window->width + 10) * boardIncreases, (window->height + 10) * boardIncreases, window);
+			extra_sleep_flag = display_lives(window, lives_remaining);
+			state = ALIVE; 
+		}
+		nodelay(stdscr, TRUE);
+		noecho();
 		break;
         }
         refresh();
